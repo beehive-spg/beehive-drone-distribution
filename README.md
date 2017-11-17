@@ -62,4 +62,4 @@ python3 -m pip install <package-name>
 > Pika is a pure-Python implementation of the AMQP 0-9-1 protocol that tries to stay fairly independent of the underlying network support library.
 
 
-[architecture]: /home/jonas/Documents/git/github/beehive-drone-distribution/assets/beehive_distribution_architecture.png "System Architecture"
+[architecture]: https://github.com/beehive-spg/beehive-drone-distribution/blob/develop/assets/beehive_distribution_architecture.png "System Architecture"

@@ -34,5 +34,7 @@ class TTP:
 		                      routing_key='',
 		                      body=self.log_message)
 		print(" [x] Sent %r" % self.log_message)
+
+	def close_connection(self):
 		self.connection.close()
 

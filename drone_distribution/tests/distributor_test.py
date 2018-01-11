@@ -13,6 +13,5 @@ def main():
 def test_operator():
 	distributor.start_distribution_to(22)
 
-
 if __name__ == '__main__':
 	main()

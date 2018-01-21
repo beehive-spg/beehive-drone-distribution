@@ -22,15 +22,6 @@ def evaluate_conerned_hive(_id):
 	logging.info("neighbors sending: {}".format(sending_neighbors))
 	publisher.send_distribution(str(sending_neighbors))
 
-# we want the lowest ranking hives
-# ranks the list of neighbors by summing their workload
-# multiply by raising/decreasing factor
-# if negative, take the positive value (-0.5 becomes 0.5)
-# if positive take the value and add 1 (0.5 becomes 1.5)
-# lowest to highest
-#####
-# loops through list, predicts impact, if the hive ranking would change
-# places with the next one, it starts taking drones from next list entry
 def get_neighbor_ranking_of(_id):
 	ranking = dict()
 	neighbors = datahandler.get_neighborhood_from(_id)
@@ -57,33 +48,67 @@ def get_sending_neighbors(ranking, drones_needed):
 def get_ordered_ranking(ranking):
 	return collections.OrderedDict(sorted(ranking.items(), key=lambda t: t[1]))
 
-# ideas
-# searching for needing hives and getting from their surrounding
-# searching hives with too much drones and search for surrounded needing hives
-# randomly send from having to needing
-def prepare_for_the_next_day():
-	hives = datahandler.get_all_hives()
+def distribute_inwardly():
+	down = datahandler.get_y().sort(reverse=True)
+	up = datahandler.get_y()
+	right = datahandler.get_x()
+	left = datahandler.get_x().sort(reverse=True)
+	hives = dict()
+	hives_with_location = datahandler.get_hive_locations_by_id()
+	if (len(up) < len(right)):
+		iterations = len(up)
+	else:
+		iterations = len(right)
+	for it in iterations:
+		hives = datahandler.get_hive_y(down[it])
+		check_hives(hives)
+		hives = datahandler.get_hive_x(left[it])
+		check_hives(hives)
+		hives = datahandler.get_hive_y(up[it])
+		check_hives(hives)
+		hives = datahandler.get_hive_x(right[it])
+		check_hives(hives)
+
+def check_hives(hives):
 	for hive in hives:
-		if (datahandler.get_hive_drone_staus()):
-			amount_of_drones = datahandler.get_drones_to_send(_id, True)
-			logging.info("EOTD dist to {}: {} drones needed".format(_id, amount_of_drones))
-			neighbors = get_possible_neighbors(_id)
-			logging.info("EOTD possible neighbors: {}".format(neighbor_ranking))
-			sending_neighbors = get_sending_neighbors(neighbors, amount_of_drones)
-			logging.info("EOTD neighbors sending: {}".format(sending_neighbors))
-			if (not sending_neighbors):
-				needing_hives.append(hive)
-			else:
-				# TODO check sending format, dict should be okay
-				publisher.send_distribution(str(sending_neighbors))
-	if(needing_hives):
-		for needing_hive in needing_hives:
-			
+		if (not hive.get_hive_drone_status(hive, 60)):
+			send(hive, datahanddler.get_possible_neighbors(), datahandler.get_drones_to_send(hive, True))
+		else:
+			receive(datahandler.get_possible_giving_neighbors(), hive)
+
+def send(_from, to):
+	publisher.send("{ "+str(_from)+":"+str(to)+" }")
+
+def send(_from, to, amount):
+	nr_per_hive = amount/len(to)
+	if (isinstance(nr_per_hive, float)):
+		nr_per_hive = int(nr_per_hive)
+		send(_from, to[1])
+	for hive in to:
+		for nr in nr_per_hive:
+			send(_from, hive)
+
+def receive(_from, to, amount):
+	nr_per_hive = amount/len(_from)
+	if (isinstance(nr_per_hive, float)):
+		nr_per_hive = int(nr_per_hive)
+		send(_from[1], to)
+	for hive in _from:
+		for nr in nr_per_hive:
+			send(hive, to)
 
 def get_possible_neighbors(_id):
 	possible_neighbors = []
 	neighbors = datahandler.get_neighborhood_from(_id)
 	for neighbor in neighbors:
-		if (datahandler.get_hive_drone_status()):
+		if (datahandler.get_hive_drone_status(neighbor, 60)):
 			possible_neighbors.append(hive)
 	return possible_neighbors
+
+def get_possible_giving_neighbors(_id):
+	possible_giving_neighbors = []
+	neighbors = datahandler.get_neighborhood_from(_id)
+	for neighbor in neighbors:
+		if (not datahandler.get_hive_drone_status(neighbor, 60)):
+			possible_giving_neighbors.append(hive)
+	return possible_giving_neighbors

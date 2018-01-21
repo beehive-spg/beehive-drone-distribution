@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from drone_distribution import test_requests as tr
+import test_requests as tr
 import json
 
 def get_workload_in(time, _id):
@@ -106,7 +106,7 @@ def get_hives_by_x(x):
 	hives = []
 	hive_locations = get_hive_locations()
 	for hive in hive_locations:
-		if (hive_locations[hive].x = x):
+		if (hive_locations[hive].x == x):
 			hives.append(hive)
 	return hives
 
@@ -114,7 +114,7 @@ def get_hives_by_y(y):
 	hives = []
 	hive_locations = get_hive_locations()
 	for hive in hive_locations:
-		if (hive_locations[hive].y = y):
+		if (hive_locations[hive].y == y):
 			hives.append(hive)
 	return hives
 

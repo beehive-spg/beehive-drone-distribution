@@ -46,7 +46,7 @@ def get_all_hives():
 def put_hive_weight(_id, weight):
 	data = dict()
 	data[_id] = weight
-	r.put(url("/"), str(data)
+	r.put(url("/"), str(data))
 
 def put_hive_weights(weights):
 	r.put(url("/"), str(weights))

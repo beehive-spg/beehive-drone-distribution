@@ -127,8 +127,8 @@ def get_hive_locations_by_id():
 	# { id:10, lon:300, lat:300 }
 	#for key, value in tr_hives.items():
 	#	hives[key] = Point(value.x, value.y)
-	for key, value in tr_hives.items():
-		hives[value['id']] = Point(value[lon], value[lat])
+	for hive in tr_hives:
+		hives['id'] = Point(hive['lon'], hive['lat'])
 	return hives;
 
 ### ---------------------------------------- OPTIONAL

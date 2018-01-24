@@ -49,6 +49,8 @@ def get_ordered_ranking(ranking):
 	return collections.OrderedDict(sorted(ranking.items(), key=lambda t: t[1]))
 
 def distribute_inwardly():
+	global hives_with_drones
+	hives_with_drones = datahandler.get_hives_with_drones()
 	down = datahandler.get_y().sort(reverse=True)
 	up = datahandler.get_y()
 	right = datahandler.get_x()
@@ -70,14 +72,19 @@ def distribute_inwardly():
 		check_hives(hives)
 
 def check_hives(hives):
+	date = datahandler.get_url_safe_date_for_the_next_day()
 	for hive in hives:
-		if (not hive.get_hive_drone_status(hive, 60)):
-			send(hive, datahanddler.get_possible_neighbors(), datahandler.get_drones_to_send(hive, True))
+		if (not hive.get_hive_drone_status(hive, date)):
+			neighbors = datahandler.get_possible_neighbors()
+			amount = datahandler.get_drones_to_send(hive, True)
+			send(hive, neighbors, amount)
 		else:
-			receive(datahandler.get_possible_giving_neighbors(), hive)
+			neighbors = datahandler.get_possible_neighbors()
+			receive(neighbors, hive)
 
 def send(_from, to):
 	publisher.send("{ "+str(_from)+":"+str(to)+" }")
+	adjust_number_of_drones_of(_from, to)
 
 def send(_from, to, amount):
 	nr_per_hive = amount/len(to)
@@ -101,7 +108,7 @@ def get_possible_neighbors(_id):
 	possible_neighbors = []
 	neighbors = datahandler.get_neighborhood_from(_id)
 	for neighbor in neighbors:
-		if (datahandler.get_hive_drone_status(neighbor, 60)):
+		if (datahandler.get_needed_drones()-hives_with_drones[neighbor]):
 			possible_neighbors.append(hive)
 	return possible_neighbors
 
@@ -109,6 +116,31 @@ def get_possible_giving_neighbors(_id):
 	possible_giving_neighbors = []
 	neighbors = datahandler.get_neighborhood_from(_id)
 	for neighbor in neighbors:
-		if (not datahandler.get_hive_drone_status(neighbor, 60)):
+		if (not datahandler.get_hive_drone_status_now(neighbor)):
 			possible_giving_neighbors.append(hive)
 	return possible_giving_neighbors
+
+def adjust_number_of_drones_of(_from, to):
+	reduce_drones_of_hive(_from)
+	increase_drones_of_hive(to)
+
+def reduce_drones_of_hive(_id):
+	hives_with_drones['id'] -= 1
+
+def increase_drones_of_hive(_id):
+	hives_with_drones['id'] += 1
+
+def get_local_needed_drones(_id):
+	date_of_next_day = datahandler.get_url_safe_date_for_the_next_day()
+	demand = datahandler.get_drone_demand(date_of_next_day, _id)
+	supply = hives_with_drones[_id]
+	return demand - supply
+
+# returns if a hive needs drones or can give drones
+# true needs, false can give
+def get_hive_local_drone_status(_id):
+	date = datahandler.get_url_safe_date_for_the_next_day()
+	number_of_drones = get_needed_drones(_id, date)
+	if (number_of_drones > 0):
+		return true
+	return false

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import test_requests as tr
-import json
+import json, datetime, base64
 
 def get_workload_in(time, _id):
 	orders = get_orders_in(time, _id)
@@ -52,6 +52,9 @@ def get_drones_without_impact(_id):
 def get_neighborhood_from(_id):
 	return tr.request_neighborhood_hives(_id) # list of _ids
 
+def get_hive_drone_status_now(_id):
+	return get_hive_drone_status(_id, datetime.datetime.now())
+
 # returns if a hive needs drones or can give drones
 # true needs, false can give
 def get_hive_drone_status(_id, time):
@@ -60,11 +63,30 @@ def get_hive_drone_status(_id, time):
 		return true
 	return false
 
+def get_url_safe_date_for_the_next_day():
+	date = get_date_for_the_next_day()
+	encoded = base64.urlsafe_b64encode("%d" % int(date))
+	return encoded
+
+def get_date_for_the_next_day():
+	now = datetime.datetime.now()
+	if (now.hour < 6):
+		date = datetime.datetime(now.year, now.month, now.day, 9, 0, 0)
+	else:
+		date = datetime.datetime(now.year, now.month, now.day+1, 9, 0, 0)
+	return date
+
 # returns number of drones needed(+) or missing(-)
 def get_needed_drones(_id, time):
-	demand = tr.request_drone_demand(time, _id)
-	supply = tr.request_drones_in(time, _id)
-	return demand - supplys
+	demand = get_drone_demand(time, _id)
+	supply = get_drone_supply(time, _id)
+	return demand - supply
+
+def get_drone_demand(time, _id):
+	return tr.request_drone_demand(time, _id)
+
+def get_drone_supply():
+	return tr.request_drones_in(time_id)
 
 def get_all_hives():
 	return tr.reqeust_all_hives()
@@ -119,16 +141,18 @@ def get_hives_by_y(y):
 	return hives
 
 # returns dict with ids and coordinates
-def get_hive_locations_by_id():
+def get_hive_locations():
 	tr_hives = tr.request_hives_with_info()
 	hives = dict()
-	# request which returns all hives incl information
-	# { 10 : {300:300} }
-	# { id:10, lon:300, lat:300 }
-	#for key, value in tr_hives.items():
-	#	hives[key] = Point(value.x, value.y)
 	for hive in tr_hives:
 		hives['id'] = Point(hive['lon'], hive['lat'])
+	return hives;
+
+def get_hives_with_drones():
+	tr_hives = tr.request_hives_with_info()
+	hives = dict()
+	for hive in tr_hives:
+		hives['id'] = hive['drones']
 	return hives;
 
 ### ---------------------------------------- OPTIONAL

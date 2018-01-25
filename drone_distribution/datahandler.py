@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import test_requests as tr
+import drone_distribution.test_requests as tr
 import json, datetime, base64
 
 def get_workload_in(time, _id):

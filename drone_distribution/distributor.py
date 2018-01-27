@@ -40,9 +40,13 @@ def get_sending_neighbors(ranking, drones_needed):
 		available_drones = datahandler.get_drones_to_send(neighbor, False)
 		if (available_drones > drones_left):
 			sending_neighbors[neighbor] = drones_left
+			drones_left = 0
 			break
 		sending_neighbors[neighbor] = available_drones
 		total_available_drones += available_drones
+	if (drones_left > 0):
+		neighbor_rank = get_neighbor_ranking_of(min(ranking, key=ranking.get))
+		get_sending_neighbors(neighbor_rank, drones_left)
 	return sending_neighbors
 
 def get_ordered_ranking(ranking):

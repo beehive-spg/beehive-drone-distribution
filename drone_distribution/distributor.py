@@ -3,7 +3,7 @@ import sys
 import os
 import logging
 from drone_distribution import datahandler
-from rabbitmq import publisher
+from drone_distribution.rabbitmq import publisher
 import collections
 
 logging.basicConfig(stream=sys.stdout, level=logging.INFO, 

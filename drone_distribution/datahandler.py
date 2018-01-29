@@ -56,12 +56,12 @@ def get_hive_drone_status_now(_id):
 	return get_hive_drone_status(_id, datetime.datetime.now())
 
 # returns if a hive needs drones or can give drones
-# true needs, false can give
+# true can give, false cannot
 def get_hive_drone_status(_id, time):
 	number_of_drones = get_needed_drones(_id, time)
 	if (number_of_drones > 0):
-		return true
-	return false
+		return True
+	return False
 
 def get_url_safe_date_for_the_next_day():
 	date = get_date_for_the_next_day()

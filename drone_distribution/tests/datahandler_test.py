@@ -86,3 +86,16 @@ def test_get_drones_to_send_eotd_false(mock_drones_without_impact):
 	drones_without_impact = datahandler.get_drones_to_send(1, False)
 	assert drones_without_impact == 10
 
+@patch('drone_distribution.datahandler.get_needed_drones')
+def test_get_hive_drone_status_return_true(mock_drones):
+	mock_drones.return_value = 20
+	status = datahandler.get_hive_drone_status(0, 0)
+	expected_status = True
+	assert status == expected_status
+
+@patch('drone_distribution.datahandler.get_needed_drones')
+def test_get_hive_drone_status_return_false(mock_drones):
+	mock_drones.return_value = -20
+	status = datahandler.get_hive_drone_status(0, 0)
+	expected_status = False
+	assert status == expected_status

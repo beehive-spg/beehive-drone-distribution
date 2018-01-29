@@ -149,7 +149,7 @@ def get_hive_locations():
 	return hives;
 
 def get_hives_with_drones():
-	tr_hives = tr.request_hives_with_info()
+	tr_hives = tr.request_all_hives_with_drones()
 	hives = dict()
 	for hive in tr_hives:
 		hives['id'] = hive['drones']

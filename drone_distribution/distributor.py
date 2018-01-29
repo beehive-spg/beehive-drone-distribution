@@ -129,10 +129,10 @@ def adjust_number_of_drones_of(_from, to):
 	increase_drones_of_hive(to)
 
 def reduce_drones_of_hive(_id):
-	hives_with_drones['id'] -= 1
+	hives_with_drones[_id] -= 1
 
 def increase_drones_of_hive(_id):
-	hives_with_drones['id'] += 1
+	hives_with_drones[_id] += 1
 
 def get_local_needed_drones(_id):
 	date_of_next_day = datahandler.get_url_safe_date_for_the_next_day()

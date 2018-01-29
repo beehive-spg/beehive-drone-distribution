@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import collections
+import collections, pytest
 from unittest.mock import patch
 from drone_distribution import distributor, datahandler
 
@@ -47,6 +47,7 @@ def test_get_neighbor_ranking_of_without_training_weight(
 	mock_neighborhood.return_value = { 1, 2, 3 }
 	mock_prediction_status.side_effect = [ 0.3, -0.1, -0.2 ]
 	mock_workload_sum.side_effect = [ 1.9, 1.4, 1.8 ]
-	expected_ranking = [ (1, 2.47), (2, 1.26), (3, 1.44)]
+	expected_ranking = [ (2, 1.26), (3, 1.44), (1, 2.47) ]
+	expected_ranking = collections.OrderedDict(expected_ranking)
 	output_ranking = distributor.get_neighbor_ranking_of(0)
-	assert expected_ranking == output_ranking
+	assert expected_ranking == pytest.approx(output_ranking)

@@ -60,7 +60,7 @@ def get_possible_giving_neighbors(mock_neighborhood, mock_hive_drones_status):
 
 @patch('drone_distribution.distributor.get_hive_local_drone_status')
 @patch('drone_distribution.distributor.get_neighborhood_from')
-def get_possible_giving_neighbors(mock_neighborhood, mock_hive_drones_status):
+def get_possible_sending_neighbors(mock_neighborhood, mock_hive_drones_status):
 	mock_neighborhood.return_value = { 1, 2, 3, 4, 5 }
 	mock_hive_drones_status.side_effect = [ True, False, False, True, True ]
 	neighbors = distributor.get_possible_giving_neighbors(0)

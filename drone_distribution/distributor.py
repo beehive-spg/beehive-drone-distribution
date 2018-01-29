@@ -79,7 +79,7 @@ def check_hives(hives):
 	date = datahandler.get_url_safe_date_for_the_next_day()
 	for hive in hives:
 		if (hive.get_hive_drone_status(hive, date)):
-			neighbors = datahandler.get_possible_neighbors()
+			neighbors = datahandler.get_possible_sending_neighbors()
 			amount = datahandler.get_drones_to_send(hive, True)
 			send(hive, neighbors, amount)
 		else:
@@ -108,7 +108,7 @@ def receive(_from, to, amount):
 		for nr in nr_per_hive:
 			send(hive, to)
 
-def get_possible_neighbors(_id):
+def get_possible_sending_neighbors(_id):
 	possible_neighbors = []
 	neighbors = datahandler.get_neighborhood_from(_id)
 	for neighbor in neighbors:

@@ -99,3 +99,21 @@ def test_get_hive_drone_status_return_false(mock_drones):
 	status = datahandler.get_hive_drone_status(0, 0)
 	expected_status = False
 	assert status == expected_status
+
+@patch('drone_distribution.datahandler.get_drone_supply')
+@patch('drone_distribution.datahandler.get_drone_demand')
+def test_get_needed_drones_positive(mock_demand, mock_supply):
+	mock_demand.return_value = 20
+	mock_supply.return_value = 10
+	drones = datahandler.get_needed_drones(0, 0)
+	expected_drones = 10
+	assert drones == expected_drones
+
+@patch('drone_distribution.datahandler.get_drone_supply')
+@patch('drone_distribution.datahandler.get_drone_demand')
+def test_get_needed_drones_negative(mock_demand, mock_supply):
+	mock_demand.return_value = 10
+	mock_supply.return_value = 20
+	drones = datahandler.get_needed_drones(0, 0)
+	expected_drones = -10
+	assert drones == expected_drones

@@ -2,10 +2,10 @@
 import requests as r
 
 port = 3000
-url = "localhost:"
+localhost = "localhost:"
 
 def get_orders_in(time, _id):
-	orders = r.get(url("/hives/workload/:"+time+"/:"_id))
+	orders = r.get(url("/hives/workload/:"+time+"/:"+_id))
 	return orders.json()
 
 def get_drones_in(time, _id):
@@ -53,4 +53,4 @@ def put_hive_weights(weights):
 	r.put(url("/"), str(weights))
 
 def url(route):
-	return url + port + route
+	return localhost + str(port) + route

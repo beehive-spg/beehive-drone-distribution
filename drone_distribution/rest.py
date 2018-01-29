@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
+import os
 import requests as r
-
-port = 3000
-localhost = "localhost:"
 
 def get_orders_in(time, _id):
 	orders = r.get(url("/hives/workload/:"+time+"/:"+_id))
@@ -53,4 +51,5 @@ def put_hive_weights(weights):
 	r.put(url("/"), str(weights))
 
 def url(route):
-	return localhost + str(port) + route
+	host = os.environ.get('DB_URL', os.environ['DBURL'])
+	return host + route

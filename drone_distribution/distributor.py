@@ -83,7 +83,7 @@ def check_hives(hives):
 			amount = datahandler.get_drones_to_send(hive, True)
 			send(hive, neighbors, amount)
 		else:
-			neighbors = datahandler.get_possible_neighbors()
+			neighbors = datahandler.get_possible_giving_neighbors()
 			receive(neighbors, hive)
 
 def send(_from, to):
@@ -112,7 +112,7 @@ def get_possible_neighbors(_id):
 	possible_neighbors = []
 	neighbors = datahandler.get_neighborhood_from(_id)
 	for neighbor in neighbors:
-		if (datahandler.get_needed_drones()-hives_with_drones[neighbor]):
+		if (datahandler.get_hive_local_drone_status(neighbor)):
 			possible_neighbors.append(hive)
 	return possible_neighbors
 
@@ -120,7 +120,7 @@ def get_possible_giving_neighbors(_id):
 	possible_giving_neighbors = []
 	neighbors = datahandler.get_neighborhood_from(_id)
 	for neighbor in neighbors:
-		if (datahandler.get_hive_drone_status_now(neighbor)):
+		if (not datahandler.get_hive_local_drone_status(neighbor)):
 			possible_giving_neighbors.append(hive)
 	return possible_giving_neighbors
 
@@ -141,10 +141,10 @@ def get_local_needed_drones(_id):
 	return demand - supply
 
 # returns if a hive needs drones or can give drones
-# true needs, false can give
+# true gives, false needs
 def get_hive_local_drone_status(_id):
 	date = datahandler.get_url_safe_date_for_the_next_day()
 	number_of_drones = get_needed_drones(_id, date)
 	if (number_of_drones > 0):
-		return true
-	return false
+		return False
+	return True

@@ -48,3 +48,21 @@ def test_get_neighbor_ranking_of_without_training_weight(
 	expected_ranking = collections.OrderedDict(expected_ranking)
 	output_ranking = distributor.get_neighbor_ranking_of(0)
 	assert expected_ranking == pytest.approx(output_ranking)
+
+@patch('drone_distribution.distributor.get_hive_local_drone_status')
+@patch('drone_distribution.distributor.get_neighborhood_from')
+def get_possible_giving_neighbors(mock_neighborhood, mock_hive_drones_status):
+	mock_neighborhood.return_value = { 1, 2, 3, 4, 5 }
+	mock_hive_drones_status.side_effect = [ True, False, False, True, True ]
+	neighbors = distributor.get_possible_giving_neighbors(0)
+	expected_neighbors = [ 1, 4, 5 ]
+	assert neighbors == expected_neighbors
+
+@patch('drone_distribution.distributor.get_hive_local_drone_status')
+@patch('drone_distribution.distributor.get_neighborhood_from')
+def get_possible_giving_neighbors(mock_neighborhood, mock_hive_drones_status):
+	mock_neighborhood.return_value = { 1, 2, 3, 4, 5 }
+	mock_hive_drones_status.side_effect = [ True, False, False, True, True ]
+	neighbors = distributor.get_possible_giving_neighbors(0)
+	expected_neighbors = [ 2, 3 ]
+	assert neighbors == expected_neighbors

@@ -34,9 +34,6 @@ def test_get_sending_neighbors_not_enough_supply(mock_drones_to_send,
 	expected_neighbors = { 22:10, 33:5, 1:1, 11:1 }
 	assert sending_drones == expected_neighbors
 
-
-
-
 @patch('drone_distribution.datahandler.get_sum_of_workload_of')
 @patch('drone_distribution.datahandler.get_prediction_status')
 @patch('drone_distribution.datahandler.get_neighborhood_from')

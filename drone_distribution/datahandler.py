@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import drone_distribution.test_requests as tr
-import json, datetime, base64
+import json, datetime, base64, sys
 
 def get_workload_in(time, _id):
 	orders = get_orders_in(time, _id)
@@ -100,29 +100,32 @@ def get_hive_location_by(message):
 	return parsed_message['location']
 
 def get_map_border():
-	upper_y, lower_y, upper_x, lower_x = 0
+	upper_y = upper_x = -1
+	lower_y = lower_x = sys.maxsize
 	for key, value in get_hive_locations().items():
 		if (upper_y < value.y):
 			upper_y = value.y
-		elif (upper_x < value.x):
-			upper_x = value.x
-		elif (lower_y < value.y):
+		if (value.y < lower_y):
 			lower_y = value.y
-		elif (lower_x < value.x):
+		if (upper_x < value.x):
+			upper_x = value.x
+		if (value.x < lower_x):
 			lower_x = value.x
-	return { upper_y, upper_x, lower_y, lower_x }
+	return [ upper_y, upper_x, lower_y, lower_x ]
 
 def get_y(descending=False):
 	y_values = []
 	for key, value in get_hive_locations().items():
 		y_values.append(value.y)
-	return y_values.sort(reverse=descending)
+	y_values.sort(reverse=descending)
+	return y_values
 
 def get_x(descending=False):
 	x_values = []
 	for key, value in get_hive_locations().items():
 		x_values.append(value.x)
-	return x_values.sort(reverse=descending)
+	x_values.sort(reverse=descending)
+	return x_values
 
 def get_hives_by_x(x):
 	hives = []
@@ -142,14 +145,14 @@ def get_hives_by_y(y):
 
 # returns dict with ids and coordinates
 def get_hive_locations():
-	tr_hives = tr.request_hives_with_info()
+	tr_hives = get_all_hives()
 	hives = dict()
 	for hive in tr_hives:
 		hives['id'] = Point(hive['lon'], hive['lat'])
 	return hives;
 
 def get_hives_with_drones():
-	tr_hives = tr.request_all_hives_with_drones()
+	tr_hives = get_hives_with_drones()
 	hives = dict()
 	for hive in tr_hives:
 		hives['id'] = hive['drones']

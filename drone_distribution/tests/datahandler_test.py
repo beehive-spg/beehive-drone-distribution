@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from unittest.mock import patch
 from drone_distribution import datahandler, test_requests
+from drone_distribution.point import Point
 
 @patch('drone_distribution.datahandler.get_drones_in')
 @patch('drone_distribution.datahandler.get_orders_in')
@@ -117,3 +118,59 @@ def test_get_needed_drones_negative(mock_demand, mock_supply):
 	drones = datahandler.get_needed_drones(0, 0)
 	expected_drones = -10
 	assert drones == expected_drones
+
+@patch('drone_distribution.datahandler.get_hive_locations')
+def test_get_x_descending_false(mock_hive_locations):
+	locations = { 1:Point(1,1), 2:Point(2,8), 3:Point(3,5), 4:Point(5,3) }
+	mock_hive_locations.return_value = locations
+	x = datahandler.get_x()
+	expected_x = [ 1, 2, 3, 5 ]
+	assert x == expected_x
+
+@patch('drone_distribution.datahandler.get_hive_locations')
+def test_get_x_descending_true(mock_hive_locations):
+	locations = { 1:Point(1,1), 2:Point(2,8), 3:Point(3,5), 4:Point(5,3) }
+	mock_hive_locations.return_value = locations
+	x = datahandler.get_x(True)
+	expected_x = [ 5, 3, 2, 1 ]
+	assert x == expected_x
+
+@patch('drone_distribution.datahandler.get_hive_locations')
+def test_get_y_descending_false(mock_hive_locations):
+	locations = { 1:Point(1,1), 2:Point(2,8), 3:Point(3,5), 4:Point(5,3) }
+	mock_hive_locations.return_value = locations
+	y = datahandler.get_y()
+	expected_y = [ 1, 3, 5, 8 ]
+	assert y == expected_y
+
+@patch('drone_distribution.datahandler.get_hive_locations')
+def test_get_y_descending_true(mock_hive_locations):
+	locations = { 1:Point(1,1), 2:Point(2,8), 3:Point(3,5), 4:Point(5,3) }
+	mock_hive_locations.return_value = locations
+	y = datahandler.get_y(True)
+	expected_y = [ 8, 5, 3, 1 ]
+	assert y == expected_y
+
+@patch('drone_distribution.datahandler.get_hive_locations')
+def test_get_hives_by_x(mock_hive_locations):
+	locations = { 1:Point(1,1), 2:Point(2,8), 3:Point(2,5), 4:Point(5,3) }
+	mock_hive_locations.return_value = locations
+	hives = datahandler.get_hives_by_x(2)
+	expected_hives = [ 2, 3 ]
+	assert hives == expected_hives
+
+@patch('drone_distribution.datahandler.get_hive_locations')
+def test_get_hives_by_y(mock_hive_locations):
+	locations = { 1:Point(1,1), 2:Point(2,1), 3:Point(3,5), 4:Point(5,1) }
+	mock_hive_locations.return_value = locations
+	hives = datahandler.get_hives_by_y(1)
+	expected_hives = [ 1, 2, 4 ]
+	assert hives == expected_hives
+
+@patch('drone_distribution.datahandler.get_hive_locations')
+def test_get_map_border(mock_hive_locations):
+	locations = { 1:Point(1,1), 2:Point(2,8), 3:Point(3,5), 4:Point(5,3) }
+	mock_hive_locations.return_value = locations
+	map_border = datahandler.get_map_border()
+	expected_border = [ 8, 5, 1, 1 ]
+	assert map_border == expected_border

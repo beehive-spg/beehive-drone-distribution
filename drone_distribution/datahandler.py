@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import drone_distribution.test_requests as tr
+from drone_distribution import rest
 import json, datetime, base64, sys
 
 def get_workload_in(time, _id):
@@ -157,6 +158,17 @@ def get_hives_with_drones():
 	for hive in tr_hives:
 		hives['id'] = hive['drones']
 	return hives;
+
+#for testing purposes
+def set_drones_for_hive(hiveid, amount):
+	#drones = []
+	for nr in range(amount):
+		drone = dict()
+		drone['hiveid'] = hiveid
+		drone['name'] = "drone-"+str(nr)
+		drone['status'] = ":status/IDLE"
+		#drones.append(drone)
+		rest.post_hive_drone(json.dumps(drone, ensure_ascii=False))
 
 ### ---------------------------------------- OPTIONAL
 def get_upper_y_from(hive_locations):

@@ -42,13 +42,11 @@ def get_all_hives():
 	hives = r.get(url("/hives"))
 	return hives.json()
 
-def put_hive_weight(_id, weight):
-	data = dict()
-	data[_id] = weight
-	r.put(url("/"), str(data))
+def post_hive_weight(weights):
+	r.post(url("/"), str(weights))
 
-def put_hive_weights(weights):
-	r.put(url("/"), str(weights))
+def post_hive_drone(drone):
+	r.post(url("/drones"), str(drone))
 
 def url(route):
 	host = os.environ.get('DB_URL', os.environ['DBURL'])

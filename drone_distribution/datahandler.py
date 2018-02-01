@@ -14,18 +14,48 @@ def get_amount_of_drones_for(_id):
 	drones = get_drones_in(get_time_of_impact(), _id)
 	return drones - (orders / workload)
 
-# TODO: get remaining charging time
-def get_time_of_impact():
+def get_time_of_impact(_from, to):
 	types = rest.get_types()
-	flying_time = get_flying_time(types)
+	flying_time = get_flying_time(_from, to, types)
 	chargetime = get_chargetime_of_drone(types)
 	return flying_time + chargetime
 
-def get_flying_time():
-	speed = get_speed_of_drone()
-	distance = get_distance_between(10,10)
+# TODO: get remaining charging time
+def get_average_time_of_impact(_id):
+	types = rest.get_types()
+	flying_time = get_average_flying_time(_id, types)
+	chargetime = get_chargetime_of_drone(types)
+	return flying_time + chargetime
+
+def get_average_flying_time(_id, types):
+	distance = get_average_distance_to(_id)
+	speed = get_speed_of_drone(types)
 	return distance / speed
 
+def get_flying_time(_from, to, types):
+	distance = get_distance_between(_from, to)
+	speed = get_speed_of_drone(types)
+	return distance / speed
+
+def get_average_distance_to(_id):
+	reachable_hives = rest.get_reachable_hives()
+	distance = []
+	for hive in reachable_hives:
+		if (hive['end']['id'] == _id or hive['start']['id'] == _id):
+			distance.append(hive['distance'])
+	return sum(distance) / len(distance)
+
+# error code -1 ? possible?
+def get_distance_between(_from, to):
+	reachable_hives = rest.get_reachable_hives()
+	for hive in reachable_hives:
+		start = hive['start']['id']
+		if (start == _from or start == to):
+			end = hive['end']['id']
+			if (end == _from or end == to):
+				return hive['distance']
+	return -1
+		
 def get_speed_of_drone(types):
 	return types['speed']
 
@@ -76,13 +106,13 @@ def get_free_drones(_id, hives):
 	return -1
 
 def get_reachable_hives(_id):
-	reachable_hives = rest.get_reachable_hives(_id)
+	reachable_hives = rest.get_reachable_hives()
 	reachable = []
 	for hive in reachable_hives:
 		if (hive['start']['id'] == _id):
-			reachable.append(hive['id'])
+			reachable.append(hive['end']['id'])
 		elif (hive['end']['id'] == _id):
-			reachable.append(hive['id'])
+			reachable.append(hive['start']['id'])
 	return reachable
 
 def get_hive_drone_status_now(_id):

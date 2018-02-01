@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import json
 from unittest.mock import patch
 from drone_distribution import datahandler
 from drone_distribution.point import Point
@@ -29,13 +30,94 @@ def test_amount_of_drones_for(mock_workload, mock_orders,
 	assert amount_of_drones == expected_amount
 
 @patch('drone_distribution.datahandler.get_chargetime_of_drone')
+@patch('drone_distribution.datahandler.get_average_flying_time')
+def test_get_average_time_of_impact(mock_flying_time, mock_charge_time):
+	mock_flying_time.return_value = 3
+	mock_charge_time.return_value = 30
+	time_of_impact = datahandler.get_average_time_of_impact(0)
+	expected_time = 33
+	assert time_of_impact == expected_time
+
+@patch('drone_distribution.datahandler.get_chargetime_of_drone')
 @patch('drone_distribution.datahandler.get_flying_time')
 def test_get_time_of_impact(mock_flying_time, mock_charge_time):
 	mock_flying_time.return_value = 3
 	mock_charge_time.return_value = 30
-	time_of_impact = datahandler.get_time_of_impact()
+	time_of_impact = datahandler.get_time_of_impact(0, 0)
 	expected_time = 33
 	assert time_of_impact == expected_time
+
+@patch('drone_distribution.datahandler.get_speed_of_drone')
+@patch('drone_distribution.datahandler.get_average_distance_to')
+def test_get_average_flying_time(mock_distance, mock_speed):
+	mock_distance.return_value = 150
+	mock_speed.return_value = 15
+	flying_time = datahandler.get_average_flying_time(0, 0)
+	expected_time = 10
+	assert flying_time == expected_time
+
+@patch('drone_distribution.datahandler.get_speed_of_drone')
+@patch('drone_distribution.datahandler.get_distance_between')
+def test_get_flying_time(mock_distance, mock_speed):
+	mock_distance.return_value = 150
+	mock_speed.return_value = 15
+	flying_time = datahandler.get_flying_time(0, 0, 0)
+	expected_time = 10
+	assert flying_time == expected_time
+
+@patch('drone_distribution.rest.get_reachable_hives')
+def test_get_reachable_hives(mock_reachable):
+	reachable = [{	'id': 1,'start': {'id': 11},
+					'end': {'id': 13},'distance': 3000},
+					{'id': 2,'start': {'id': 12},
+					'end': {'id': 13},'distance': 2500},
+					{'id': 3,'start': {'id': 12},
+					'end': {'id': 11},'distance': 2500}]
+	reachable_hives = json.dumps(reachable)
+	mock_reachable.return_value = json.loads(reachable_hives)
+	reachable_hives = datahandler.get_reachable_hives(13)
+	expected_hives = [ 11, 12 ]
+	assert reachable_hives == expected_hives
+
+@patch('drone_distribution.rest.get_reachable_hives')
+def test_get_average_distance_to(mock_reachable):
+	reachable = [{	'id': 1,'start': {'id': 11},
+					'end': {'id': 13},'distance': 3000},
+					{'id': 2,'start': {'id': 12},
+					'end': {'id': 13},'distance': 2500},
+					{'id': 3,'start': {'id': 12},
+					'end': {'id': 11},'distance': 2500}]
+	reachable_hives = json.dumps(reachable)
+	mock_reachable.return_value = json.loads(reachable_hives)
+	reachable_hives = datahandler.get_average_distance_to(13)
+	expected_hives = 5500 / 2
+	assert reachable_hives == expected_hives
+
+@patch('drone_distribution.rest.get_reachable_hives')
+def test_get_distance_between(mock_reachable):
+	reachable = [{	'id': 1,'start': {'id': 11},
+					'end': {'id': 13},'distance': 3000},
+					{'id': 2,'start': {'id': 12},
+					'end': {'id': 13},'distance': 2500},
+					{'id': 3,'start': {'id': 12},
+					'end': {'id': 11},'distance': 2500}]
+	reachable_hives = json.dumps(reachable)
+	mock_reachable.return_value = json.loads(reachable_hives)
+	distance = datahandler.get_distance_between(12, 13)
+	expected_distance = 2500
+	assert distance == expected_distance
+
+@patch('drone_distribution.rest.get_reachable_hives')
+def test_get_distance_between_return_error_code(mock_reachable):
+	reachable = [{	'id': 1,'start': {'id': 11},
+					'end': {'id': 13},'distance': 3000},
+					{'id': 2,'start': {'id': 12},
+					'end': {'id': 11},'distance': 2500}]
+	reachable_hives = json.dumps(reachable)
+	mock_reachable.return_value = json.loads(reachable_hives)
+	distance = datahandler.get_distance_between(12, 13)
+	expected_distance = -1
+	assert distance == expected_distance
 
 @patch('drone_distribution.rest.get_drones_in')
 def test_get_drones_in(mock_drones):

@@ -24,7 +24,7 @@ def evaluate_conerned_hive(_id):
 
 def get_neighbor_ranking_of(_id):
 	ranking = dict()
-	neighbors = datahandler.get_neighborhood_from(_id)
+	neighbors = datahandler.get_reachable_hives(_id)
 	for neighbor in neighbors:
 		multiplier = datahandler.get_prediction_status(neighbor)
 		multiplier += 1
@@ -110,7 +110,7 @@ def receive(_from, to, amount):
 
 def get_possible_receiving_neighbors(_id):
 	possible_neighbors = []
-	neighbors = datahandler.get_neighborhood_from(_id)
+	neighbors = datahandler.get_reachable_hives(_id)
 	for neighbor in neighbors:
 		if (not get_hive_local_drone_status(neighbor)):
 			possible_neighbors.append(neighbor)
@@ -118,7 +118,7 @@ def get_possible_receiving_neighbors(_id):
 
 def get_possible_giving_neighbors(_id):
 	possible_giving_neighbors = []
-	neighbors = datahandler.get_neighborhood_from(_id)
+	neighbors = datahandler.get_reachable_hives(_id)
 	for neighbor in neighbors:
 		if (get_hive_local_drone_status(neighbor)):
 			possible_giving_neighbors.append(neighbor)

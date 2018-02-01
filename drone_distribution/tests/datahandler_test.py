@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 from unittest.mock import patch
-from drone_distribution import datahandler, test_requests
+from drone_distribution import datahandler
 from drone_distribution.point import Point
 
 @patch('drone_distribution.datahandler.get_drones_in')
@@ -28,22 +28,22 @@ def test_amount_of_drones_for(mock_workload, mock_orders,
 	amount_of_drones = datahandler.get_amount_of_drones_for(0)
 	assert amount_of_drones == expected_amount
 
-@patch('drone_distribution.test_requests.request_charging_time')
-@patch('drone_distribution.test_requests.request_flying_time')
-def test_get_time_of_impact(mock_flying_time, mock_charging_time):
+@patch('drone_distribution.datahandler.get_chargetime_of_drone')
+@patch('drone_distribution.datahandler.get_flying_time')
+def test_get_time_of_impact(mock_flying_time, mock_charge_time):
 	mock_flying_time.return_value = 3
-	mock_charging_time.return_value = 30
+	mock_charge_time.return_value = 30
 	time_of_impact = datahandler.get_time_of_impact()
 	expected_time = 33
 	assert time_of_impact == expected_time
 
-@patch('drone_distribution.test_requests.request_drones_in')
+@patch('drone_distribution.rest.get_drones_in')
 def test_get_drones_in(mock_drones):
 	mock_drones.return_value = 10
 	drones = datahandler.get_drones_in(1,1)
 	assert drones == 10
 
-@patch('drone_distribution.test_requests.request_orders_in')
+@patch('drone_distribution.rest.get_orders_in')
 def test_orders_in(mock_orders):
 	mock_orders.return_value = 10
 	orders = datahandler.get_orders_in(1,1)
@@ -81,9 +81,9 @@ def test_get_drones_to_send_eotd_true(mock_needed_drones):
 	needed_drones = datahandler.get_drones_to_send(1, True)
 	assert needed_drones == 10
 
-@patch('drone_distribution.datahandler.get_drones_without_impact')
-def test_get_drones_to_send_eotd_false(mock_drones_without_impact):
-	mock_drones_without_impact.return_value = 10
+@patch('drone_distribution.datahandler.get_free_drones')
+def test_get_drones_to_send_eotd_false(mock_free_drones):
+	mock_free_drones.return_value = 10
 	drones_without_impact = datahandler.get_drones_to_send(1, False)
 	assert drones_without_impact == 10
 

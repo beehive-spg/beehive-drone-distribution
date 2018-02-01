@@ -19,7 +19,7 @@ def get_time_of_impact():
 	types = rest.get_types()
 	flying_time = get_flying_time(types)
 	chargetime = get_chargetime_of_drone(types)
-	return flying_time + charging_time
+	return flying_time + chargetime
 
 def get_flying_time():
 	speed = get_speed_of_drone()
@@ -53,7 +53,7 @@ def get_sum_of_workload_of(_id):
 # TODO: adapt to database
 def get_drones_in(time, _id):
 	drones = rest.get_drones_in(time, _id)
-	return drones['drones']
+	return drones
 
 # TODO: adapt to database
 def get_orders_in(time, _id):
@@ -62,9 +62,10 @@ def get_orders_in(time, _id):
 # eotd true, returns drones needed for the next day
 # eotd false, returns drones needed to harm the network as little as possible
 def get_drones_to_send(_id, eotd):
+	hives = rest.get_all_hives()
 	if (eotd):
 		return get_needed_drones(_id)
-	return get_drones_without_impact(_id)
+	return get_free_drones(_id, hives)
 
 # TODO: adapt to database
 # TODO: non existing id? possible?
@@ -230,10 +231,9 @@ def get_hive_weight_evaluation():
 def get_number_of_hives():
 	return len(get_all_hives())
 
-'''
+# TODO: adapt to new model
 def get_drone_demand(time, _id):
 	return tr.request_drone_demand(time, _id)
 
 def get_drone_supply():
 	return tr.request_drones_in(time_id)
-'''

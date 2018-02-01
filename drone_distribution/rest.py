@@ -30,11 +30,11 @@ def url(route):
 	host = os.environ.get('DB_URL', os.environ['DBURL'])
 	return host + route
 
-'''
 # TODO: adapt to database
 def get_orders_in(time, _id):
-	orders = r.get(url("/hives/workload/:"+time+"/:"+_id))
+	orders = r.get(url("/hives/workload/:"+str(time)+"/:"+str(_id)))
 	return orders.json()
+
 def get_drones_in(time, _id):
 	drones = r.get(url("/"))
 	return drones.json()
@@ -43,6 +43,6 @@ def get_drones_in(time, _id):
 def get_hive_weight_evaluation():
 	evaluation = r.get(url("/"))
 	return evaluation.json()
+
 def post_hive_weight(weights):
 	r.post(url("/"), str(weights))
-'''

@@ -198,6 +198,13 @@ def get_hive_locations():
 		hives[hive['id']] = Point(hive['xcoord'], hive['ycoord'])
 	return hives;
 
+def get_all_hive_ids():
+	all_hives = rest.get_all_hives()
+	hives = []
+	for hive in all_hives:
+		hives.append(hive['hive']['id'])
+	return hives
+
 def get_drones_of_hive(_id):
 	hives_with_drones = rest.get_drones_of_hive(_id)
 	hives = []

@@ -283,3 +283,18 @@ def test_get_hives_with_drones(mock_drones_of_hives):
 	drones = datahandler.get_drones_of_hive(0)
 	expected_drones = [ 1, 2 ]
 	assert drones == expected_drones
+
+@patch('drone_distribution.rest.get_all_hives')
+def test_get_all_hive_ids(mock_all_hives):
+	all_hives = [
+		{"id": 1,"address": "Karlsplatz",
+			"xcoord": 16,"ycoord": 48,"hive":
+			{"id": 11,"name": "Karlsplatz"}},
+		{"id": 2,"address": "Westbahnhof",
+			"xcoord": 32,"ycoord": 11,"hive":
+		{"id": 12,"name": "Westbahnhof"}
+		}]
+	mock_all_hives.return_value = all_hives
+	hives = datahandler.get_all_hive_ids()
+	expected_hives = [ 11, 12 ]
+	assert hives == expected_hives

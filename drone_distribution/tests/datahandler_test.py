@@ -298,3 +298,34 @@ def test_get_all_hive_ids(mock_all_hives):
 	hives = datahandler.get_all_hive_ids()
 	expected_hives = [ 11, 12 ]
 	assert hives == expected_hives
+
+@patch('drone_distribution.rest.get_all_drones')
+@patch('drone_distribution.rest.get_all_hives')
+def test_get_hives_with_drones(mock_hives, mock_drones):
+	all_hives = [
+		{"id": 1,"address": "Karlsplatz",
+			"xcoord": 16,"ycoord": 48,"hive":
+			{"id": 11,"name": "Karlsplatz"}},
+		{"id": 2,"address": "Westbahnhof",
+			"xcoord": 32,"ycoord": 11,"hive":
+			{"id": 12,"name": "Westbahnhof"}
+		}]
+	all_drones = [
+		{"id": 101,"hive": {"id": 11},"name": "drone01",
+			"type": {"id": 0},"status": {"ident": "IDLE"}},
+		{"id": 102,"hive": {"id": 12},"name": "drone02",
+			"type": {"id": 0},"status": {"ident": "IDLE"}},
+		{"id": 103,"hive": {"id": 11},"name": "drone03",
+			"type": {"id": 0},"status": {"ident": "IDLE"}
+		}]
+	mock_hives.return_value = all_hives
+	mock_drones.return_value = all_drones
+	hives_with_drones = datahandler.get_hives_with_drones()
+	expected_hives_with_drones = { 11:2, 12:1 }
+	expected_length = len(expected_hives_with_drones)
+	length = 0
+	for hive in hives_with_drones:
+		if (hive in expected_hives_with_drones):
+			if (hives_with_drones[hive] == expected_hives_with_drones[hive]):
+				length += 1
+	assert length == expected_length

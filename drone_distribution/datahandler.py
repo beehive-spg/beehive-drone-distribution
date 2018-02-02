@@ -206,11 +206,24 @@ def get_all_hive_ids():
 	return hives
 
 def get_drones_of_hive(_id):
-	hives_with_drones = rest.get_drones_of_hive(_id)
+	drones_of_hive = rest.get_drones_of_hive(_id)
 	hives = []
-	for hive in hives_with_drones:
+	for hive in drones_of_hive:
 		hives.append(hive['id'])
 	return hives;
+
+def get_hives_with_drones():
+	all_drones = rest.get_all_drones()
+	all_hives = rest.get_all_hives()
+	hives = dict()
+	for hive in all_hives:
+		number_of_drones = 0
+		for drone in all_drones:
+			if (hive['hive']['id'] == drone['hive']['id']):
+				number_of_drones += 1
+		hives[hive['hive']['id']] = number_of_drones
+	return hives
+
 
 #for testing purposes
 def set_drones_for_hive(hiveid, amount):

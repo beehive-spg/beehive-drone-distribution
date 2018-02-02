@@ -69,8 +69,8 @@ def test_get_flying_time(mock_distance, mock_speed):
 def test_get_reachable_hives(mock_reachable):
 	reachable = [{	'id': 1,'start': {'id': 11},
 					'end': {'id': 13},'distance': 3000},
-					{'id': 2,'start': {'id': 12},
-					'end': {'id': 13},'distance': 2500},
+					{'id': 2,'start': {'id': 13},
+					'end': {'id': 12},'distance': 2500},
 					{'id': 3,'start': {'id': 12},
 					'end': {'id': 11},'distance': 2500}]
 	reachable_hives = json.dumps(reachable)
@@ -251,8 +251,35 @@ def test_get_hives_by_y(mock_hive_locations):
 
 @patch('drone_distribution.datahandler.get_hive_locations')
 def test_get_map_border(mock_hive_locations):
-	locations = { 1:Point(1,1), 2:Point(2,8), 3:Point(3,5), 4:Point(5,3) }
+	locations = { 1:Point(1,1), 2:Point(5,8), 3:Point(3,5), 4:Point(2,3) }
 	mock_hive_locations.return_value = locations
 	map_border = datahandler.get_map_border()
 	expected_border = [ 8, 5, 1, 1 ]
 	assert map_border == expected_border
+
+@patch('drone_distribution.rest.get_all_hives')
+def test_get_hive_locations(mock_all_hives):
+	all_hives = [
+		{"id": 1,"address": "Karlsplatz",
+			"xcoord": 16,"ycoord": 48,"hive":
+			{"id": 11,"name": "Karlsplatz"}},
+		{"id": 2,"address": "Westbahnhof",
+			"xcoord": 32,"ycoord": 11,"hive":
+		{"id": 12,"name": "Westbahnhof"}
+		}]
+	mock_all_hives.return_value = all_hives
+	hives = datahandler.get_hive_locations()
+	expected_hives = { 1:Point(16,48), 2:Point(32,11) }
+	assert len(hives) == len(expected_hives)
+
+@patch('drone_distribution.rest.get_drones_of_hive')
+def test_get_hives_with_drones(mock_drones_of_hives):
+	drones_of_hive = [
+	{"id": 1,"name": "drone01","type": {"id": 17592186045434},
+		"status": {"id": 17592186045421}},
+    {"id": 2,"name": "drone02","type": {"id": 17592186045434},
+    	"status": {"id": 17592186045421}}]
+	mock_drones_of_hives.return_value = drones_of_hive
+	drones = datahandler.get_drones_of_hive(0)
+	expected_drones = [ 1, 2 ]
+	assert drones == expected_drones

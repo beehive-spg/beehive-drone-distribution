@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import drone_distribution.test_requests as tr
 from drone_distribution import rest
+from drone_distribution.point import Point
 import json, datetime, base64, sys
 
 def get_workload_in(time, _id):
@@ -197,11 +198,11 @@ def get_hive_locations():
 		hives[hive['id']] = Point(hive['xcoord'], hive['ycoord'])
 	return hives;
 
-def get_hives_with_drones():
-	hives_with_drones = get_hives_with_drones()
-	hives = dict()
+def get_drones_of_hive(_id):
+	hives_with_drones = rest.get_drones_of_hive(_id)
+	hives = []
 	for hive in hives_with_drones:
-		hives[hive['id']] = hive['drones']
+		hives.append(hive['id'])
 	return hives;
 
 #for testing purposes

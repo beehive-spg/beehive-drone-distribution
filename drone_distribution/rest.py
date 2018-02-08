@@ -2,7 +2,7 @@
 import os
 import requests as r
 
-def get_reachable_hives():
+def get_reachable_buildings():
 	hives = r.get(url("/reachable"))
 	return hives.json()
 
@@ -23,7 +23,7 @@ def get_all_hives_with_workload():
 	hives = r.get(url("/hives/workload"))
 	return hives.json()
 
-def get_all_drones(_id):
+def get_all_drones():
 	hives = r.get(url("/drones"))
 	return hives.json()
 

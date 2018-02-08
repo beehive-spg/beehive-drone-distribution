@@ -45,6 +45,14 @@ def test_get_distance_between_return_error_code(mock_reachable):
 	assert distance == expected_distance
 
 @patch('drone_distribution.datahandler.get_hive_locations')
+def test_get_map_border(mock_hive_locations):
+	locations = { 1:Point(1,1), 2:Point(5,8), 3:Point(3,5), 4:Point(2,3) }
+	mock_hive_locations.return_value = locations
+	map_border = locationhandler.get_map_border()
+	expected_border = [ 8, 5, 1, 1 ]
+	assert map_border == expected_border
+
+@patch('drone_distribution.datahandler.get_hive_locations')
 def test_get_x_descending_false(mock_hive_locations):
 	locations = { 1:Point(1,1), 2:Point(2,8), 3:Point(3,5), 4:Point(5,3) }
 	mock_hive_locations.return_value = locations
@@ -92,10 +100,26 @@ def test_get_hives_by_y(mock_hive_locations):
 	expected_hives = [ 1, 2, 4 ]
 	assert hives == expected_hives
 
-@patch('drone_distribution.datahandler.get_hive_locations')
-def test_get_map_border(mock_hive_locations):
-	locations = { 1:Point(1,1), 2:Point(5,8), 3:Point(3,5), 4:Point(2,3) }
-	mock_hive_locations.return_value = locations
-	map_border = locationhandler.get_map_border()
-	expected_border = [ 8, 5, 1, 1 ]
-	assert map_border == expected_border
+def test_get_upper_x():
+	locations = { 1:Point(1,1), 2:Point(2,1), 3:Point(5,6), 4:Point(5,0) }
+	x = locationhandler.get_upper_x(locations)
+	expected_x = 5
+	assert x == expected_x
+
+def test_get_upper_y():
+	locations = { 1:Point(1,1), 2:Point(2,1), 3:Point(5,6), 4:Point(5,0) }
+	y = locationhandler.get_upper_y(locations)
+	expected_y = 6
+	assert y == expected_y
+
+def test_get_lower_x():
+	locations = { 1:Point(1,1), 2:Point(2,1), 3:Point(5,6), 4:Point(5,0) }
+	x = locationhandler.get_lower_x(locations)
+	expected_x = 1
+	assert x == expected_x
+
+def test_get_lower_y():
+	locations = { 1:Point(1,1), 2:Point(2,1), 3:Point(5,6), 4:Point(5,0) }
+	y = locationhandler.get_lower_y(locations)
+	expected_y = 0
+	assert y == expected_y

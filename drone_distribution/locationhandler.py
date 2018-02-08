@@ -64,31 +64,30 @@ def get_hives_by_y(y):
 			hives.append(hive)
 	return hives
 
-
-def get_upper_y_from(hive_locations):
-	y = 0
-	for key, value in hive_locations.items():
-		if (y < value.y):
-			y = value.y
-	return y
-
-def get_upper_x_from(hive_locations):
-	x = 0
+def get_upper_x(hive_locations):
+	x = -1
 	for key, value in hive_locations.items():
 		if (x < value.x):
 			x = value.x
 	return x
 
-def get_lower_y_from(hive_locations):
-	y = 0
+def get_upper_y(hive_locations):
+	y = -1
 	for key, value in hive_locations.items():
-		if (y > value.y):
+		if (y < value.y):
 			y = value.y
 	return y
 
-def get_lower_x_from(hive_locations):
-	x = 0
+def get_lower_x(hive_locations):
+	x = sys.maxsize
 	for key, value in hive_locations.items():
 		if (x > value.x):
 			x = value.x
 	return x
+
+def get_lower_y(hive_locations):
+	y = sys.maxsize
+	for key, value in hive_locations.items():
+		if (y > value.y):
+			y = value.y
+	return y

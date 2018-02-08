@@ -8,9 +8,8 @@
 import logging
 import random
 import sys
-from drone_distribution import test_requests as tr
 
-logging.basicConfig(stream=sys.stdout, level=logging.INFO, 
+logging.basicConfig(stream=sys.stdout, level=logging.INFO,
 	format='%(asctime)s - %(name)-5s- %(levelname)-5s- %(message)s')
 
 def main(accuracy):
@@ -26,7 +25,7 @@ def setup_training():
 	weighted_hives = { 11:1.1, 22:1.0}
 	logging.info("list of hives: " + str(weighted_hives))
 	# run system
-	moved_drones_before = tr.request_number_of_moved_drones()
+	#moved_drones_before = tr.request_number_of_moved_drones()
 	logging.info("number of moved drones before: " + str(moved_drones_before))
 
 def train(accuracy, iterations=None):
@@ -39,7 +38,7 @@ def train(accuracy, iterations=None):
 		logging.info("start training data")
 		# run the whole system with the test data
 		logging.info("training data completed")
-		moved_drones_after = tr.request_number_of_moved_drones()
+		#moved_drones_after = tr.request_number_of_moved_drones()
 		moved_drones = get_moved_drones_difference(moved_drones_after)
 		if (moved_drones > 0):
 			logging.info("improved by: " + str(moved_drones))

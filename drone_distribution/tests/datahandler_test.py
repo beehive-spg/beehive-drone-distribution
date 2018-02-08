@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 import json
 from unittest.mock import patch
-from drone_distribution import datahandler, dronehandler
 from drone_distribution.point import Point
+from drone_distribution import datahandler
+from drone_distribution import dronehandler
 
 @patch('drone_distribution.datahandler.get_drones_in')
 @patch('drone_distribution.datahandler.get_orders_in')
@@ -43,6 +44,31 @@ def test_get_reachable_buildings(mock_reachable):
 	expected_hives = [ 11, 12 ]
 	assert reachable_buildings == expected_hives
 
+@patch('drone_distribution.rest.get_reachable_buildings')
+@patch('drone_distribution.rest.get_all_hives')
+def test_get_reachable_hives(mock_hives, mock_reachable):
+	all_hives = [	{"id": 1,"address": "Karlsplatz",
+					"xcoord": 16,"ycoord": 48,"hive":{
+					"id": 11,"name": "Karlsplatz"}},
+					{"id": 2,"address": "Westbahnhof",
+					"xcoord": 32,"ycoord": 11,"hive":{
+					"id": 12,"name": "Westbahnhof"}},
+					{"id": 3,"address": "Westbahnhof",
+					"xcoord": 32,"ycoord": 11,"hive":{
+					"id": 13,"name": "Westbahnhof"}}]
+	mock_hives.return_value = all_hives
+	reachable = [	{'id': 1111,'start': {'id': 1},
+					'end': {'id': 2},'distance': 3000},
+					{'id': 2222,'start': {'id': 3},
+					'end': {'id': 1},'distance': 2500},
+					{'id': 3333,'start': {'id': 2},
+					'end': {'id': 3},'distance': 2800}]
+	reachable_buildings = json.dumps(reachable)
+	mock_reachable.return_value = json.loads(reachable_buildings)
+	reachable_hives = datahandler.get_reachable_hives(12)
+	expected_hives = [ 11, 13 ]
+	assert reachable_hives == expected_hives
+
 @patch('drone_distribution.rest.get_drones_in')
 def test_get_drones_in(mock_drones):
 	mock_drones.return_value = 10
@@ -54,6 +80,19 @@ def test_orders_in(mock_orders):
 	mock_orders.return_value = 10
 	orders = datahandler.get_orders_in(1,1)
 	assert orders == 10
+
+def test_get_free_drones():
+	all_hives = [
+		{"id": 1,"address": "Karlsplatz",
+			"xcoord": 16,"ycoord": 48,"hive":
+			{"id": 11,"name": "Karlsplatz", "free": 1}},
+		{"id": 2,"address": "Westbahnhof",
+			"xcoord": 32,"ycoord": 11,"hive":
+		{"id": 12,"name": "Westbahnhof", "free": 3}
+		}]
+	free_drones = datahandler.get_free_drones(2, all_hives)
+	expected_drones = 3
+	assert free_drones == expected_drones
 
 @patch('drone_distribution.dronehandler.get_time_of_impact')
 @patch('drone_distribution.datahandler.get_workload_in')
@@ -88,7 +127,9 @@ def test_get_drones_to_send_eotd_true(mock_needed_drones):
 	assert needed_drones == 10
 
 @patch('drone_distribution.datahandler.get_free_drones')
-def test_get_drones_to_send_eotd_false(mock_free_drones):
+@patch('drone_distribution.rest.get_all_hives')
+def test_get_drones_to_send_eotd_false(mock_hives, mock_free_drones):
+	mock_hives.return_value = ""
 	mock_free_drones.return_value = 10
 	drones_without_impact = datahandler.get_drones_to_send(1, False)
 	assert drones_without_impact == 10
@@ -126,7 +167,7 @@ def test_get_needed_drones_negative(mock_demand, mock_supply):
 	assert drones == expected_drones
 
 @patch('drone_distribution.rest.get_all_hives')
-def test_get_hive_locations(mock_all_hives):
+def test_get_hive_locations(mock_hives):
 	all_hives = [
 		{"id": 1,"address": "Karlsplatz",
 			"xcoord": 16,"ycoord": 48,"hive":
@@ -135,25 +176,25 @@ def test_get_hive_locations(mock_all_hives):
 			"xcoord": 32,"ycoord": 11,"hive":
 		{"id": 12,"name": "Westbahnhof"}
 		}]
-	mock_all_hives.return_value = all_hives
+	mock_hives.return_value = all_hives
 	hives = datahandler.get_hive_locations()
 	expected_hives = { 1:Point(16,48), 2:Point(32,11) }
 	assert len(hives) == len(expected_hives)
 
 @patch('drone_distribution.rest.get_drones_of_hive')
-def test_get_hives_with_drones(mock_drones_of_hives):
+def test_get_drones_of_hive(mock_drones_of_hive):
 	drones_of_hive = [
-	{"id": 1,"name": "drone01","type": {"id": 17592186045434},
-		"status": {"id": 17592186045421}},
-    {"id": 2,"name": "drone02","type": {"id": 17592186045434},
-    	"status": {"id": 17592186045421}}]
-	mock_drones_of_hives.return_value = drones_of_hive
+		{"id": 1,"name": "drone01","type": {"id": 17592186045434},
+			"status": {"id": 17592186045421}},
+		{"id": 2,"name": "drone02","type": {"id": 17592186045434},
+			"status": {"id": 17592186045421}}]
+	mock_drones_of_hive.return_value = drones_of_hive
 	drones = datahandler.get_drones_of_hive(0)
 	expected_drones = [ 1, 2 ]
 	assert drones == expected_drones
 
 @patch('drone_distribution.rest.get_all_hives')
-def test_get_all_hive_ids(mock_all_hives):
+def test_get_all_hive_ids(mock_hives):
 	all_hives = [
 		{"id": 1,"address": "Karlsplatz",
 			"xcoord": 16,"ycoord": 48,"hive":
@@ -162,7 +203,7 @@ def test_get_all_hive_ids(mock_all_hives):
 			"xcoord": 32,"ycoord": 11,"hive":
 		{"id": 12,"name": "Westbahnhof"}
 		}]
-	mock_all_hives.return_value = all_hives
+	mock_hives.return_value = all_hives
 	hives = datahandler.get_all_hive_ids()
 	expected_hives = [ 11, 12 ]
 	assert hives == expected_hives

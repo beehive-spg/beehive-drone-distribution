@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 import json
-import drone_distribution.test_requests as tr
 from drone_distribution import rest, helper, dronehandler
 from drone_distribution.point import Point
 
@@ -42,9 +41,9 @@ def get_orders_in(time, _id):
 # eotd true, returns drones needed for the next day
 # eotd false, returns drones needed to harm the network as little as possible
 def get_drones_to_send(_id, eotd):
-	hives = rest.get_all_hives()
 	if (eotd):
 		return get_needed_drones(_id, helper.get_timestamp_for_the_next_day())
+	hives = rest.get_all_hives()
 	return get_free_drones(_id, hives)
 
 # TODO: adapt to database
@@ -52,7 +51,7 @@ def get_drones_to_send(_id, eotd):
 def get_free_drones(_id, hives):
 	for hive in hives:
 		if (hive['id'] == _id):
-			return hive['free']
+			return hive['hive']['free']
 	return -1
 
 # TODO: refactor
@@ -67,6 +66,7 @@ def get_reachable_buildings(_id):
 	return reachable
 
 def get_reachable_hives(_id):
+	_id = get_building_of_hive(_id)
 	buildings = get_reachable_buildings(_id)
 	all_hives = rest.get_all_hives()
 	reachable = []
@@ -75,6 +75,13 @@ def get_reachable_hives(_id):
 			if (hive['id'] == building):
 				reachable.append(hive['hive']['id'])
 	return reachable
+
+def get_building_of_hive(_id):
+	hives = rest.get_all_hives()
+	for hive in hives:
+		if (hive['hive']['id'] == _id):
+			return hive['id']
+	return -1
 
 def is_giving_drones_now(_id):
 	return is_giving_drones(_id, datetime.datetime.now())
@@ -132,7 +139,7 @@ def set_drones_for_hive(hiveid, amount):
 		drone = dict()
 		drone['hiveid'] = hiveid
 		drone['name'] = "drone-"+str(nr)
-		drone['status'] = ":status/IDLE"
+		drone['status'] = ":drone.status/idle"
 		#drones.append(drone)
 		rest.post_hive_drone(json.dumps(drone, ensure_ascii=False))
 
@@ -157,4 +164,4 @@ def get_drone_demand(time, _id):
 	return 5
 
 def get_drone_supply(time, _id):
-	return tr.request_drones_in(time, _id)
+	return 5

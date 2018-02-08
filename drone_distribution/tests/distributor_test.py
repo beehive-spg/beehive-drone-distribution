@@ -68,18 +68,18 @@ def test_get_possible_receiving_neighbors(mock_reachable_hives, mock_hive_drones
 	assert neighbors == expected_neighbors
 
 @patch('drone_distribution.distributor.get_local_needed_drones')
-@patch('drone_distribution.datahandler.get_url_safe_date_for_the_next_day')
-def test_get_hive_local_drone_status_expect_true(mock_date, mock_drones):
-	mock_date.return_value = 0
+@patch('drone_distribution.helper.get_timestamp_for_the_next_day')
+def test_get_hive_local_drone_status_expect_true(mock_timestamp, mock_drones):
+	mock_timestamp.return_value = 0
 	mock_drones.return_value = 20
 	needed_drones = distributor.get_hive_local_drone_status(0)
 	expected_drone_status = False
 	assert needed_drones == expected_drone_status
 
 @patch('drone_distribution.distributor.get_local_needed_drones')
-@patch('drone_distribution.datahandler.get_url_safe_date_for_the_next_day')
-def test_get_hive_local_drone_status_expect_false(mock_date, mock_drones):
-	mock_date.return_value = 0
+@patch('drone_distribution.helper.get_timestamp_for_the_next_day')
+def test_get_hive_local_drone_status_expect_false(mock_timestamp, mock_drones):
+	mock_timestamp.return_value = 0
 	mock_drones.return_value = -20
 	needed_drones = distributor.get_hive_local_drone_status(0)
 	expected_drone_status = True

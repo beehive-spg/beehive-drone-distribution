@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
+import json
 import drone_distribution.test_requests as tr
-from drone_distribution import rest
+from drone_distribution import rest, helper, dronehandler
 from drone_distribution.point import Point
-import json, datetime, base64, sys
 
 def get_workload_in(time, _id):
 	orders = get_orders_in(time, _id)
@@ -11,73 +11,22 @@ def get_workload_in(time, _id):
 
 def get_amount_of_drones_for(_id):
 	workload = get_workload_in(0, _id)
-	orders = get_orders_in(get_time_of_impact(), _id)
-	drones = get_drones_in(get_time_of_impact(), _id)
+	orders = get_orders_in(dronehandler.get_time_of_impact(), _id)
+	drones = get_drones_in(dronehandler.get_time_of_impact(), _id)
 	return drones - (orders / workload)
-
-def get_time_of_impact(_from, to):
-	types = rest.get_types()
-	flying_time = get_flying_time(_from, to, types)
-	chargetime = get_chargetime_of_drone(types)
-	return flying_time + chargetime
-
-# TODO: get remaining charging time
-def get_average_time_of_impact(_id):
-	types = rest.get_types()
-	flying_time = get_average_flying_time(_id, types)
-	chargetime = get_chargetime_of_drone(types)
-	return flying_time + chargetime
-
-def get_average_flying_time(_id, types):
-	distance = get_average_distance_to(_id)
-	speed = get_speed_of_drone(types)
-	return distance / speed
-
-def get_flying_time(_from, to, types):
-	distance = get_distance_between(_from, to)
-	speed = get_speed_of_drone(types)
-	return distance / speed
-
-def get_average_distance_to(_id):
-	reachable_hives = rest.get_reachable_hives()
-	distance = []
-	for hive in reachable_hives:
-		if (hive['end']['id'] == _id or hive['start']['id'] == _id):
-			distance.append(hive['distance'])
-	return sum(distance) / len(distance)
-
-# error code -1 ? possible?
-def get_distance_between(_from, to):
-	reachable_hives = rest.get_reachable_hives()
-	for hive in reachable_hives:
-		start = hive['start']['id']
-		if (start == _from or start == to):
-			end = hive['end']['id']
-			if (end == _from or end == to):
-				return hive['distance']
-	return -1
-		
-def get_speed_of_drone(types):
-	return types['speed']
-
-def get_range_of_drone(types):
-	return types['range']
-
-def get_chargetime_of_drone(types):
-	return types['chargetime']
 
 # rising or decreasing
 def get_prediction_status(_id):
 	current_workload = get_workload_in(0, _id)
-	predicted_workload = get_workload_in(get_time_of_impact(), _id)
+	predicted_workload = get_workload_in(dronehandler.get_time_of_impact(), _id)
 	return predicted_workload - current_workload
 
 def get_sum_of_workload_of(_id):
 	current_workload = get_workload_in(0, _id)
 	_sum = current_workload
-	predicted_workload_inbetween = get_workload_in(get_time_of_impact()/2, _id)
+	predicted_workload_inbetween = get_workload_in(dronehandler.get_time_of_impact()/2, _id)
 	_sum += predicted_workload_inbetween
-	predicted_workload_at_drone_arrival = get_workload_in(get_time_of_impact(), _id)
+	predicted_workload_at_drone_arrival = get_workload_in(dronehandler.get_time_of_impact(), _id)
 	_sum += predicted_workload_at_drone_arrival
 	return _sum
 
@@ -95,7 +44,7 @@ def get_orders_in(time, _id):
 def get_drones_to_send(_id, eotd):
 	hives = rest.get_all_hives()
 	if (eotd):
-		return get_needed_drones(_id)
+		return get_needed_drones(_id, helper.get_timestamp_for_the_next_day())
 	return get_free_drones(_id, hives)
 
 # TODO: adapt to database
@@ -106,89 +55,41 @@ def get_free_drones(_id, hives):
 			return hive['free']
 	return -1
 
-def get_reachable_hives(_id):
-	reachable_hives = rest.get_reachable_hives()
+# TODO: refactor
+def get_reachable_buildings(_id):
+	reachable_buildings = rest.get_reachable_buildings()
 	reachable = []
-	for hive in reachable_hives:
+	for hive in reachable_buildings:
 		if (hive['start']['id'] == _id):
 			reachable.append(hive['end']['id'])
 		elif (hive['end']['id'] == _id):
 			reachable.append(hive['start']['id'])
 	return reachable
 
-def get_hive_drone_status_now(_id):
-	return get_hive_drone_status(_id, datetime.datetime.now())
+def get_reachable_hives(_id):
+	buildings = get_reachable_buildings(_id)
+	all_hives = rest.get_all_hives()
+	reachable = []
+	for hive in all_hives:
+		for building in buildings:
+			if (hive['id'] == building):
+				reachable.append(hive['hive']['id'])
+	return reachable
 
-# returns if a hive needs drones or can give drones
-# true can give, false cannot
-def get_hive_drone_status(_id, time):
+def is_giving_drones_now(_id):
+	return is_giving_drones(_id, datetime.datetime.now())
+
+def is_giving_drones(_id, time):
 	number_of_drones = get_needed_drones(_id, time)
 	if (number_of_drones > 0):
 		return True
 	return False
-
-def get_url_safe_date_for_the_next_day():
-	date = get_date_for_the_next_day()
-	encoded = base64.urlsafe_b64encode("%d" % int(date))
-	return encoded
-
-def get_date_for_the_next_day():
-	now = datetime.datetime.now()
-	if (now.hour < 6):
-		date = datetime.datetime(now.year, now.month, now.day, 9, 0, 0)
-	else:
-		date = datetime.datetime(now.year, now.month, now.day+1, 9, 0, 0)
-	return date
 
 # returns number of drones needed(+) or missing(-)
 def get_needed_drones(_id, time):
 	demand = get_drone_demand(time, _id)
 	supply = get_drone_supply(time, _id)
 	return demand - supply
-
-def get_map_border():
-	upper_y = upper_x = -1
-	lower_y = lower_x = sys.maxsize
-	for key, value in get_hive_locations().items():
-		if (upper_y < value.y):
-			upper_y = value.y
-		if (value.y < lower_y):
-			lower_y = value.y
-		if (upper_x < value.x):
-			upper_x = value.x
-		if (value.x < lower_x):
-			lower_x = value.x
-	return [ upper_y, upper_x, lower_y, lower_x ]
-
-def get_y(descending=False):
-	y_values = []
-	for key, value in get_hive_locations().items():
-		y_values.append(value.y)
-	y_values.sort(reverse=descending)
-	return y_values
-
-def get_x(descending=False):
-	x_values = []
-	for key, value in get_hive_locations().items():
-		x_values.append(value.x)
-	x_values.sort(reverse=descending)
-	return x_values
-
-def get_hives_by_x(x):
-	hives = []
-	hive_locations = get_hive_locations()
-	for hive in hive_locations:
-		if (hive_locations[hive].x == x):
-			hives.append(hive)
-	return hives
-
-def get_hives_by_y(y):
-	hives = []
-	hive_locations = get_hive_locations()
-	for hive in hive_locations:
-		if (hive_locations[hive].y == y):
-			hives.append(hive)
-	return hives
 
 # returns dict with ids and coordinates
 def get_hive_locations():
@@ -210,7 +111,7 @@ def get_drones_of_hive(_id):
 	hives = []
 	for hive in drones_of_hive:
 		hives.append(hive['id'])
-	return hives;
+	return hives
 
 def get_hives_with_drones():
 	all_drones = rest.get_all_drones()
@@ -223,7 +124,6 @@ def get_hives_with_drones():
 				number_of_drones += 1
 		hives[hive['hive']['id']] = number_of_drones
 	return hives
-
 
 #for testing purposes
 def set_drones_for_hive(hiveid, amount):
@@ -238,40 +138,10 @@ def set_drones_for_hive(hiveid, amount):
 
 
 ### ---------------------------------------- OPTIONAL
-def get_upper_y_from(hive_locations):
-	y = 0
-	for key, value in hive_locations.items():
-		if (y < value.y):
-			y = value.y
-	return y
-
-def get_upper_x_from(hive_locations):
-	x = 0
-	for key, value in hive_locations.items():
-		if (x < value.x):
-			x = value.x
-	return x
-
-def get_lower_y_from(hive_locations):
-	y = 0
-	for key, value in hive_locations.items():
-		if (y > value.y):
-			y = value.y
-	return y
-
-def get_lower_x_from(hive_locations):
-	x = 0
-	for key, value in hive_locations.items():
-		if (x > value.x):
-			x = value.x
-	return x
-
-def get_average_workload():
-	return rest.get_average_workload()
 
 def get_impact_to(_id, drones):
-	future_orders = get_orders_in(get_time_of_impact(), _id)
-	future_drones = get_drones_in(get_time_of_impact(), _id)
+	future_orders = get_orders_in(dronehandler.get_time_of_impact(), _id)
+	future_drones = get_drones_in(dronehandler.get_time_of_impact(), _id)
 	future_drones += drones
 	return future_orders / future_drones
 
@@ -284,7 +154,7 @@ def get_number_of_hives():
 
 # TODO: adapt to new model
 def get_drone_demand(time, _id):
-	return tr.request_drone_demand(time, _id)
+	return 5
 
-def get_drone_supply():
-	return tr.request_drones_in(time_id)
+def get_drone_supply(time, _id):
+	return tr.request_drones_in(time, _id)

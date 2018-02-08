@@ -2,7 +2,7 @@
 import sys
 import os
 import logging
-from drone_distribution import datahandler
+from drone_distribution import datahandler, helper, locationhandler
 from drone_distribution.rabbitmq import publisher
 import collections
 
@@ -55,42 +55,54 @@ def get_ordered_ranking(ranking):
 def distribute_inwardly():
 	global hives_with_drones
 	hives_with_drones = datahandler.get_hives_with_drones()
-	down = datahandler.get_y().sort(reverse=True)
-	up = datahandler.get_y()
-	right = datahandler.get_x()
-	left = datahandler.get_x().sort(reverse=True)
+	logging.info(hives_with_drones)
+	down = locationhandler.get_y(descending=True)
+	up = locationhandler.get_y()
+	right = locationhandler.get_x()
+	left = locationhandler.get_x(descending=True)
+	logging.info("down"+str(down))
+	logging.info(up)
+	logging.info(right)
+	logging.info(left)
 	hives = dict()
-	hives_with_location = datahandler.get_hive_locations_by_id()
+	hives_with_location = datahandler.get_hive_locations()
 	if (len(up) < len(right)):
 		iterations = len(up)
+		logging.info("up is smaller")
 	else:
+		logging.info("up is smaller")
 		iterations = len(right)
-	for it in iterations:
-		hives = datahandler.get_hive_y(down[it])
+	for it in range(iterations):
+		hives = locationhandler.get_hives_by_y(down[it])
 		check_hives(hives)
-		hives = datahandler.get_hive_x(left[it])
+		hives = locationhandler.get_hives_by_x(left[it])
 		check_hives(hives)
-		hives = datahandler.get_hive_y(up[it])
+		hives = locationhandler.get_hives_by_y(up[it])
 		check_hives(hives)
-		hives = datahandler.get_hive_x(right[it])
+		hives = locationhandler.get_hives_by_x(right[it])
 		check_hives(hives)
 
 def check_hives(hives):
-	date = datahandler.get_url_safe_date_for_the_next_day()
+	date = helper.get_timestamp_for_the_next_day()
 	for hive in hives:
-		if (hive.get_hive_drone_status(hive, date)):
-			neighbors = datahandler.get_possible_receiving_neighbors()
+		if (datahandler.is_giving_drones(hive, date)):
+			logging.info("------------------------")
+			neighbors = get_possible_receiving_neighbors(hive)
 			amount = datahandler.get_drones_to_send(hive, True)
-			send(hive, neighbors, amount)
+			send_drones(hive, neighbors, amount)
 		else:
-			neighbors = datahandler.get_possible_giving_neighbors()
-			receive(neighbors, hive)
+			logging.info("-----------------else-")
+			neighbors = get_possible_giving_neighbors(hive)
+			amount = datahandler.get_drones_to_send(hive, True)
+			receive(neighbors, hive, amount)
 
 def send(_from, to):
-	publisher.send("{ "+str(_from)+":"+str(to)+" }")
+	publisher.send_distribution("{ "+str(_from)+":"+str(to)+" }")
+	logging.info("from: {} - to: {}".format(_from, to))
+	print("from: " + str(_from) + "--- to: " + str(to))
 	adjust_number_of_drones_of(_from, to)
 
-def send(_from, to, amount):
+def send_drones(_from, to, amount):
 	nr_per_hive = amount/len(to)
 	if (isinstance(nr_per_hive, float)):
 		nr_per_hive = int(nr_per_hive)
@@ -117,8 +129,11 @@ def get_possible_receiving_neighbors(_id):
 	return possible_neighbors
 
 def get_possible_giving_neighbors(_id):
+	logging.info("---------------ölasdfj--")
 	possible_giving_neighbors = []
 	neighbors = datahandler.get_reachable_hives(_id)
+	logging.info(_id)
+	logging.info(neighbors)
 	for neighbor in neighbors:
 		if (get_hive_local_drone_status(neighbor)):
 			possible_giving_neighbors.append(neighbor)
@@ -135,7 +150,7 @@ def increase_drones_of_hive(_id):
 	hives_with_drones[_id] += 1
 
 def get_local_needed_drones(_id):
-	date_of_next_day = datahandler.get_url_safe_date_for_the_next_day()
+	date_of_next_day = helper.get_timestamp_for_the_next_day()
 	demand = datahandler.get_drone_demand(date_of_next_day, _id)
 	supply = hives_with_drones[_id]
 	return demand - supply
@@ -143,8 +158,7 @@ def get_local_needed_drones(_id):
 # returns if a hive needs drones or can give drones
 # true gives, false needs
 def get_hive_local_drone_status(_id):
-	date = datahandler.get_url_safe_date_for_the_next_day()
-	number_of_drones = get_local_needed_drones(_id, date)
+	number_of_drones = get_local_needed_drones(_id)
 	if (number_of_drones > 0):
 		return False
 	return True

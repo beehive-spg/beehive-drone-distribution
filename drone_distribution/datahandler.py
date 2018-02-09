@@ -143,6 +143,34 @@ def set_drones_for_hive(hiveid, amount):
 		#drones.append(drone)
 		rest.post_hive_drone(json.dumps(drone, ensure_ascii=False))
 
+def set_d_of_hive(hiveid, hives):
+	incoming = get_incoming_drones(hiveid, hives)
+	outgoing = get_outgoing_drones(hiveid, hives)
+	io_ratio = incoming / outgoing
+	drone_demand = get_drone_demand(hiveid, hives)
+	demand = dict()
+	demand['demand'] = drone_demand
+	demand = json.dumps(demand, ensure_ascii=False)
+	rest.post_desired_drones_of_hive(hiveid, demand)
+
+# TODO: error code handling
+def get_incoming_drones(hiveid, hives):
+	for hive in hives:
+		if (hives['hive']['id'] == hiveid):
+			return hives['hive']['i']
+	return 99999
+
+def get_outgoing_drones(hiveid, hives):
+	for hive in hives:
+		if (hives['hive']['id'] == hiveid):
+			return hives['hive']['o']
+	return 99999
+
+def get_drone_demand(hiveid, hives):
+	for hive in hives:
+		if (hives['hive']['id'] == hiveid):
+			return hives['hive']['demand']
+	return 99999
 
 ### ---------------------------------------- OPTIONAL
 
@@ -158,10 +186,3 @@ def get_hive_weight_evaluation():
 
 def get_number_of_hives():
 	return len(get_all_hives())
-
-# TODO: adapt to new model
-def get_drone_demand(time, _id):
-	return 5
-
-def get_drone_supply(time, _id):
-	return 5

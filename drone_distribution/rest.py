@@ -23,6 +23,10 @@ def get_all_hives_with_workload():
 	hives = r.get(url("/hives/workload"))
 	return hives.json()
 
+def get_hive_by(_id):
+	hive = r.get(url("/one/hive/" + str(_id)))
+	return hives.json()
+
 def get_all_drones():
 	hives = r.get(url("/drones"))
 	return hives.json()
@@ -33,6 +37,9 @@ def get_drones_of_hive(_id):
 
 def post_hive_drone(drone):
 	r.post(url("/drones"), str(drone))
+
+def post_drone_demand_of_hive(_id, demand):
+	r.post(url("/hive/" + str(_id), demand))
 
 def url(route):
 	host = os.environ.get('DB_URL', os.environ['DBURL'])

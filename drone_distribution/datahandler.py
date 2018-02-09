@@ -95,7 +95,7 @@ def is_giving_drones(_id, time):
 # returns number of drones needed(+) or missing(-)
 def get_needed_drones(_id, time):
 	demand = get_drone_demand(time, _id)
-	supply = get_drone_supply(time, _id)
+	supply = get_free_drones(time, _id)
 	return demand - supply
 
 # returns dict with ids and coordinates

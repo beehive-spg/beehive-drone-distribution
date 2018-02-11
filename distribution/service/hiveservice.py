@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 import json
-from drone_distribution import rest, helper, dronehandler
-from drone_distribution.point import Point
+from distribution.domain.point import Point
+from distribution.rest import rest
+from distribution.service import droneservice, helper
 
 def get_workload_in(time, _id):
 	orders = get_orders_in(time, _id)
@@ -10,22 +11,22 @@ def get_workload_in(time, _id):
 
 def get_amount_of_drones_for(_id):
 	workload = get_workload_in(0, _id)
-	orders = get_orders_in(dronehandler.get_time_of_impact(), _id)
-	drones = get_drones_in(dronehandler.get_time_of_impact(), _id)
+	orders = get_orders_in(droneservice.get_time_of_impact(), _id)
+	drones = get_drones_in(droneservice.get_time_of_impact(), _id)
 	return drones - (orders / workload)
 
 # rising or decreasing
 def get_prediction_status(_id):
 	current_workload = get_workload_in(0, _id)
-	predicted_workload = get_workload_in(dronehandler.get_time_of_impact(), _id)
+	predicted_workload = get_workload_in(droneservice.get_time_of_impact(), _id)
 	return predicted_workload - current_workload
 
 def get_sum_of_workload_of(_id):
 	current_workload = get_workload_in(0, _id)
 	_sum = current_workload
-	predicted_workload_inbetween = get_workload_in(dronehandler.get_time_of_impact()/2, _id)
+	predicted_workload_inbetween = get_workload_in(droneservice.get_time_of_impact()/2, _id)
 	_sum += predicted_workload_inbetween
-	predicted_workload_at_drone_arrival = get_workload_in(dronehandler.get_time_of_impact(), _id)
+	predicted_workload_at_drone_arrival = get_workload_in(droneservice.get_time_of_impact(), _id)
 	_sum += predicted_workload_at_drone_arrival
 	return _sum
 
@@ -175,8 +176,8 @@ def get_drone_demand(hiveid, hives):
 ### ---------------------------------------- OPTIONAL
 
 def get_impact_to(_id, drones):
-	future_orders = get_orders_in(dronehandler.get_time_of_impact(), _id)
-	future_drones = get_drones_in(dronehandler.get_time_of_impact(), _id)
+	future_orders = get_orders_in(droneservice.get_time_of_impact(), _id)
+	future_drones = get_drones_in(droneservice.get_time_of_impact(), _id)
 	future_drones += drones
 	return future_orders / future_drones
 

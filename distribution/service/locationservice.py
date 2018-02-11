@@ -1,5 +1,6 @@
 import sys
-from drone_distribution import datahandler, rest
+from distribution.rest import rest
+from distribution.service import hiveservice
 
 def get_average_distance_to(_id):
 	reachable_buildings = rest.get_reachable_buildings()
@@ -23,7 +24,7 @@ def get_distance_between(_from, to):
 def get_map_border():
 	upper_y = upper_x = -1
 	lower_y = lower_x = sys.maxsize
-	for key, value in datahandler.get_hive_locations().items():
+	for key, value in hiveservice.get_hive_locations().items():
 		if (upper_y < value.y):
 			upper_y = value.y
 		if (value.y < lower_y):
@@ -36,21 +37,21 @@ def get_map_border():
 
 def get_y(descending=False):
 	y_values = []
-	for key, value in datahandler.get_hive_locations().items():
+	for key, value in hiveservice.get_hive_locations().items():
 		y_values.append(value.y)
 	y_values.sort(reverse=descending)
 	return y_values
 
 def get_x(descending=False):
 	x_values = []
-	for key, value in datahandler.get_hive_locations().items():
+	for key, value in hiveservice.get_hive_locations().items():
 		x_values.append(value.x)
 	x_values.sort(reverse=descending)
 	return x_values
 
 def get_hives_by_x(x):
 	hives = []
-	hive_locations = datahandler.get_hive_locations()
+	hive_locations = hiveservice.get_hive_locations()
 	for hive in hive_locations:
 		if (hive_locations[hive].x == x):
 			hives.append(hive)
@@ -58,7 +59,7 @@ def get_hives_by_x(x):
 
 def get_hives_by_y(y):
 	hives = []
-	hive_locations = datahandler.get_hive_locations()
+	hive_locations = hiveservice.get_hive_locations()
 	for hive in hive_locations:
 		if (hive_locations[hive].y == y):
 			hives.append(hive)

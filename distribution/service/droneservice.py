@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-from drone_distribution import rest, locationhandler
+from distribution.rest import rest
+from distribution.service import locationservice
 
 def get_time_of_impact(_from, to):
 	types = rest.get_types()
@@ -15,12 +16,12 @@ def get_average_time_of_impact(_id):
 	return flying_time + chargetime
 
 def get_flying_time(_from, to, types):
-	distance = locationhandler.get_distance_between(_from, to)
+	distance = locationservice.get_distance_between(_from, to)
 	speed = get_speed_of_drone(types)
 	return distance / speed
 
 def get_average_flying_time(_id, types):
-	distance = locationhandler.get_average_distance_to(_id)
+	distance = locationservice.get_average_distance_to(_id)
 	speed = get_speed_of_drone(types)
 	return distance / speed
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import collections, pytest
 from unittest.mock import patch
-from drone_distribution import distributor, datahandler
+from distribution.service import distributor, hiveservice
 
 def test_get_ordered_ranking():
 	input_ranking = { 33:0.8, 11:0.94, 22:0.2, 1:0.93 }
@@ -9,7 +9,7 @@ def test_get_ordered_ranking():
 	expected_ranking = { 22:0.2, 33:0.8, 1:0.93, 11:0.94 }
 	assert output_ranking == expected_ranking
 
-@patch('drone_distribution.datahandler.get_drones_to_send')
+@patch('distribution.service.hiveservice.get_drones_to_send')
 def test_get_sending_neighbors_enough_supply(mock_drones_to_send):
 	mock_drones_to_send.side_effect = [ 15, 10 ]
 	ranking = [ (22,0.2), (33,0.8), (1,0.93), (11,0.94) ]
@@ -19,8 +19,8 @@ def test_get_sending_neighbors_enough_supply(mock_drones_to_send):
 	expected_neighbors = { 22:15, 33:5 }
 	assert sending_drones == expected_neighbors
 
-@patch('drone_distribution.distributor.get_neighbor_ranking_of')
-@patch('drone_distribution.datahandler.get_drones_to_send')
+@patch('distribution.service.distributor.get_neighbor_ranking_of')
+@patch('distribution.service.hiveservice.get_drones_to_send')
 def test_get_sending_neighbors_not_enough_supply(mock_drones_to_send,
 													mock_neighbors):
 	mock_drones_to_send.side_effect = [ 10, 5, 1, 1, 5 ]
@@ -34,9 +34,9 @@ def test_get_sending_neighbors_not_enough_supply(mock_drones_to_send,
 	expected_neighbors = { 22:10, 33:5, 1:1, 11:1 }
 	assert sending_drones == expected_neighbors
 
-@patch('drone_distribution.datahandler.get_sum_of_workload_of')
-@patch('drone_distribution.datahandler.get_prediction_status')
-@patch('drone_distribution.datahandler.get_reachable_hives')
+@patch('distribution.service.hiveservice.get_sum_of_workload_of')
+@patch('distribution.service.hiveservice.get_prediction_status')
+@patch('distribution.service.hiveservice.get_reachable_hives')
 def test_get_neighbor_ranking_of_without_training_weight(
 									mock_reachable_hives,
 									mock_prediction_status,
@@ -49,8 +49,8 @@ def test_get_neighbor_ranking_of_without_training_weight(
 	output_ranking = distributor.get_neighbor_ranking_of(0)
 	assert expected_ranking == pytest.approx(output_ranking)
 
-@patch('drone_distribution.distributor.get_hive_local_drone_status')
-@patch('drone_distribution.datahandler.get_reachable_hives')
+@patch('distribution.service.distributor.get_hive_local_drone_status')
+@patch('distribution.service.hiveservice.get_reachable_hives')
 def test_get_possible_giving_neighbors(mock_reachable_hives, mock_hive_drones_status):
 	mock_reachable_hives.return_value = [ 1, 2, 3, 4, 5 ]
 	mock_hive_drones_status.side_effect = [ True, False, False, True, True ]
@@ -58,8 +58,8 @@ def test_get_possible_giving_neighbors(mock_reachable_hives, mock_hive_drones_st
 	expected_neighbors = [ 1, 4, 5 ]
 	assert neighbors == expected_neighbors
 
-@patch('drone_distribution.distributor.get_hive_local_drone_status')
-@patch('drone_distribution.datahandler.get_reachable_hives')
+@patch('distribution.service.distributor.get_hive_local_drone_status')
+@patch('distribution.service.hiveservice.get_reachable_hives')
 def test_get_possible_receiving_neighbors(mock_reachable_hives, mock_hive_drones_status):
 	mock_reachable_hives.return_value = [ 1, 2, 3, 4, 5 ]
 	mock_hive_drones_status.side_effect = [ True, False, False, True, True ]
@@ -67,8 +67,8 @@ def test_get_possible_receiving_neighbors(mock_reachable_hives, mock_hive_drones
 	expected_neighbors = [ 2, 3 ]
 	assert neighbors == expected_neighbors
 
-@patch('drone_distribution.distributor.get_local_needed_drones')
-@patch('drone_distribution.helper.get_timestamp_for_the_next_day')
+@patch('distribution.service.distributor.get_local_needed_drones')
+@patch('distribution.service.helper.get_timestamp_for_the_next_day')
 def test_get_hive_local_drone_status_expect_true(mock_timestamp, mock_drones):
 	mock_timestamp.return_value = 0
 	mock_drones.return_value = 20
@@ -76,8 +76,8 @@ def test_get_hive_local_drone_status_expect_true(mock_timestamp, mock_drones):
 	expected_drone_status = False
 	assert needed_drones == expected_drone_status
 
-@patch('drone_distribution.distributor.get_local_needed_drones')
-@patch('drone_distribution.helper.get_timestamp_for_the_next_day')
+@patch('distribution.service.distributor.get_local_needed_drones')
+@patch('distribution.service.helper.get_timestamp_for_the_next_day')
 def test_get_hive_local_drone_status_expect_false(mock_timestamp, mock_drones):
 	mock_timestamp.return_value = 0
 	mock_drones.return_value = -20

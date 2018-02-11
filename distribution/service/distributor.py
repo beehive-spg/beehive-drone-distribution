@@ -2,11 +2,11 @@
 import sys
 import os
 import logging
-from drone_distribution import datahandler, helper, locationhandler
-from drone_distribution.rabbitmq import publisher
+from distribution.rabbitmq import publisher
+from distribution.service import hiveservice, locationservice, helper
 import collections
 
-logging.basicConfig(stream=sys.stdout, level=logging.INFO, 
+logging.basicConfig(stream=sys.stdout, level=logging.INFO,
 	format='%(asctime)s - %(name)-5s- %(levelname)-5s- %(message)s')
 
 def start_distribution_to(_id):
@@ -14,7 +14,7 @@ def start_distribution_to(_id):
 	evaluate_conerned_hive(_id)
 
 def evaluate_conerned_hive(_id):
-	amount_of_drones = datahandler.get_amount_of_drones_for(_id)
+	amount_of_drones = hiveservice.get_amount_of_drones_for(_id)
 	logging.info("dist to {}: {} drones needed".format(_id, amount_of_drones))
 	neighbor_ranking = get_neighbor_ranking_of(_id)
 	logging.info("neighbors: {}".format(neighbor_ranking))
@@ -24,11 +24,11 @@ def evaluate_conerned_hive(_id):
 
 def get_neighbor_ranking_of(_id):
 	ranking = dict()
-	neighbors = datahandler.get_reachable_hives(_id)
+	neighbors = hiveservice.get_reachable_hives(_id)
 	for neighbor in neighbors:
-		multiplier = datahandler.get_prediction_status(neighbor)
+		multiplier = hiveservice.get_prediction_status(neighbor)
 		multiplier += 1
-		_sum = datahandler.get_sum_of_workload_of(neighbor)
+		_sum = hiveservice.get_sum_of_workload_of(neighbor)
 		ranking[neighbor] = _sum * multiplier
 	return get_ordered_ranking(ranking)
 
@@ -37,7 +37,7 @@ def get_sending_neighbors(ranking, drones_needed):
 	total_available_drones = 0
 	for neighbor in ranking:
 		drones_left = drones_needed - total_available_drones
-		available_drones = datahandler.get_drones_to_send(neighbor, False)
+		available_drones = hiveservice.get_drones_to_send(neighbor, False)
 		if (available_drones > drones_left):
 			sending_neighbors[neighbor] = drones_left
 			drones_left = 0
@@ -54,18 +54,18 @@ def get_ordered_ranking(ranking):
 
 def distribute_inwardly():
 	global hives_with_drones
-	hives_with_drones = datahandler.get_hives_with_drones()
+	hives_with_drones = hiveservice.get_hives_with_drones()
 	logging.info(hives_with_drones)
-	down = locationhandler.get_y(descending=True)
-	up = locationhandler.get_y()
-	right = locationhandler.get_x()
-	left = locationhandler.get_x(descending=True)
+	down = locationservice.get_y(descending=True)
+	up = locationservice.get_y()
+	right = locationservice.get_x()
+	left = locationservice.get_x(descending=True)
 	logging.info("down"+str(down))
 	logging.info(up)
 	logging.info(right)
 	logging.info(left)
 	hives = dict()
-	hives_with_location = datahandler.get_hive_locations()
+	hives_with_location = hiveservice.get_hive_locations()
 	if (len(up) < len(right)):
 		iterations = len(up)
 		logging.info("up is smaller")
@@ -73,27 +73,27 @@ def distribute_inwardly():
 		logging.info("up is smaller")
 		iterations = len(right)
 	for it in range(iterations):
-		hives = locationhandler.get_hives_by_y(down[it])
+		hives = locationservice.get_hives_by_y(down[it])
 		check_hives(hives)
-		hives = locationhandler.get_hives_by_x(left[it])
+		hives = locationservice.get_hives_by_x(left[it])
 		check_hives(hives)
-		hives = locationhandler.get_hives_by_y(up[it])
+		hives = locationservice.get_hives_by_y(up[it])
 		check_hives(hives)
-		hives = locationhandler.get_hives_by_x(right[it])
+		hives = locationservice.get_hives_by_x(right[it])
 		check_hives(hives)
 
 def check_hives(hives):
 	date = helper.get_timestamp_for_the_next_day()
 	for hive in hives:
-		if (datahandler.is_giving_drones(hive, date)):
+		if (hiveservice.is_giving_drones(hive, date)):
 			logging.info("------------------------")
 			neighbors = get_possible_receiving_neighbors(hive)
-			amount = datahandler.get_drones_to_send(hive, True)
+			amount = hiveservice.get_drones_to_send(hive, True)
 			send_drones(hive, neighbors, amount)
 		else:
 			logging.info("-----------------else-")
 			neighbors = get_possible_giving_neighbors(hive)
-			amount = datahandler.get_drones_to_send(hive, True)
+			amount = hiveservice.get_drones_to_send(hive, True)
 			receive(neighbors, hive, amount)
 
 def send(_from, to):
@@ -122,7 +122,7 @@ def receive(_from, to, amount):
 
 def get_possible_receiving_neighbors(_id):
 	possible_neighbors = []
-	neighbors = datahandler.get_reachable_hives(_id)
+	neighbors = hiveservice.get_reachable_hives(_id)
 	for neighbor in neighbors:
 		if (not get_hive_local_drone_status(neighbor)):
 			possible_neighbors.append(neighbor)
@@ -131,7 +131,7 @@ def get_possible_receiving_neighbors(_id):
 def get_possible_giving_neighbors(_id):
 	logging.info("---------------ölasdfj--")
 	possible_giving_neighbors = []
-	neighbors = datahandler.get_reachable_hives(_id)
+	neighbors = hiveservice.get_reachable_hives(_id)
 	logging.info(_id)
 	logging.info(neighbors)
 	for neighbor in neighbors:
@@ -151,7 +151,7 @@ def increase_drones_of_hive(_id):
 
 def get_local_needed_drones(_id):
 	date_of_next_day = helper.get_timestamp_for_the_next_day()
-	demand = datahandler.get_drone_demand(date_of_next_day, _id)
+	demand = hiveservice.get_drone_demand(date_of_next_day, _id)
 	supply = hives_with_drones[_id]
 	return demand - supply
 

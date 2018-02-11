@@ -173,6 +173,23 @@ def get_drone_demand(hiveid, hives):
 			return hives['hive']['demand']
 	return 99999
 
+# ---------------------------- based on domains
+def get_all_hives():
+	all_hives = rest.get_all_hives()
+	hives = []
+	for hive in hives:
+		hivedomain = get_hivedomain(hive)
+		hives.append(domain)
+	return hives
+
+def get_hivedomain(json):
+	hive = Hive()
+	hive.id = json['hive']['id']
+	hive.name = json['hive']['name']
+	hive.demand = json['hive']['demand']
+	hive.validate()
+	return hive
+
 ### ---------------------------------------- OPTIONAL
 
 def get_impact_to(_id, drones):

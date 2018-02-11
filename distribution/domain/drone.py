@@ -4,10 +4,10 @@ from schematics.types import IntType, StringType
 from schematics.types.compound import ModelType
 
 class Drone(Model):
-	_id = IntType(required=True)
+	id = IntType(required=True)
 	hive = ModelType(Hive)
 	name = StringType()
-	_type = ModelType(Type)
+	type = ModelType(Type)
 	status = StringType(choices = [
 							Status.idle.value,
 							Status.flying.value,

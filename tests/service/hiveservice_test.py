@@ -4,7 +4,7 @@ from pytest import fixture
 from unittest.mock import patch
 from distribution.domain.hive import Hive
 from distribution.domain.drone import Drone
-from distribution.domain.point import Point
+from distribution.domain.building import Building
 from distribution.service import hiveservice, buildingservice, droneservice
 
 @fixture
@@ -12,15 +12,30 @@ def json_buildings():
 	return [{"id": 1,"address": "Karlsplatz",
 			"xcoord": 16,"ycoord": 48,
 			"hive":{"id": 11,"name": "Karlsplatz",
-				"demand": -1, "free": 1}},
+				"demand": -1, "free": 1, "incoming":5, "outgoing": 2}},
 			{"id": 2,"address": "Westbahnhof",
 			"xcoord": 32,"ycoord": 11,
 			"hive":{"id": 12,"name": "Westbahnhof",
-				"demand": -1, "free": 3}},
+				"demand": -1, "free": 3, "incoming":10, "outgoing": 5}},
 			{"id": 3,"address": "Stephansplatz",
 			"xcoord": 2,"ycoord": 21,
 			"hive":{"id": 13,"name": "Stephansplatz",
-				"demand": -1, "free": 8}}]
+				"demand": -1, "free": 8, "incoming":1, "outgoing": 5}}]
+
+@fixture
+def domain_buildings():
+	return [Building({"id": 1,"address": "Karlsplatz",
+						"xcoord": 16,"ycoord": 48,
+						"hive":{"id": 11,"name": "Karlsplatz",
+						"demand": -1, "free": 1, "incoming":5, "outgoing": 2}}),
+			Building({"id": 2,"address": "Westbahnhof",
+						"xcoord": 32,"ycoord": 11,
+						"hive":{"id": 12,"name": "Westbahnhof",
+						"demand": -1, "free": 3, "incoming":10, "outgoing": 5}}),
+			Building({"id": 3,"address": "Stephansplatz",
+						"xcoord": 2,"ycoord": 21,
+						"hive":{"id": 13,"name": "Stephansplatz",
+						"demand": -1, "free": 8, "incoming":1, "outgoing": 5}})]
 
 @fixture
 def json_hives():
@@ -29,9 +44,12 @@ def json_hives():
 
 @fixture
 def domain_hives():
-	return [Hive({"id": 11,"name": "Karlsplatz", "demand": -1, "free": 1}),
-			Hive({"id": 12,"name": "Westbahnhof", "demand": -1, "free": 3}),
-			Hive({"id": 13,"name": "Stephansplatz", "demand": -1, "free": 8})]
+	return [Hive({"id": 11,"name": "Karlsplatz", "demand": -1, "free": 1,
+					"incoming":5, "outgoing": 2}),
+			Hive({"id": 12,"name": "Westbahnhof", "demand": -1, "free": 3,
+					"incoming":10, "outgoing": 5}),
+			Hive({"id": 13,"name": "Stephansplatz", "demand": -1, "free": 8,
+					"incoming":1, "outgoing": 5})]
 
 @fixture
 def json_reachable():
@@ -181,6 +199,50 @@ def test_get_needed_drones_negative(mock_demand, mock_supply):
 	drones = hiveservice.get_needed_drones(0, 0)
 	expected_drones = -10
 	assert drones == expected_drones
+
+def test_get_drone_demand_existing():
+	demand = hiveservice.get_drone_demand(12, domain_hives())
+	expected_demand = -1
+	assert demand == expected_demand
+
+def test_get_drone_demand_not_existing():
+	demand = hiveservice.get_drone_demand(0, domain_hives())
+	expected_demand = 99999
+	assert demand == expected_demand
+
+def test_get_incoming_drones_correct_return():
+	incoming = hiveservice.get_incoming_drones(12, domain_hives())
+	expected_incoming = 10
+	assert incoming == expected_incoming
+
+def test_get_incoming_drones_error_code():
+	incoming = hiveservice.get_incoming_drones(0, domain_hives())
+	expected_incoming = 99999
+	assert incoming == expected_incoming
+
+def test_get_outgoing_drones_correct_return():
+	outgoing = hiveservice.get_outgoing_drones(12, domain_hives())
+	expected_outgoing = 5
+	assert outgoing == expected_outgoing
+
+def test_get_outgoing_drones_error_code():
+	outgoing = hiveservice.get_outgoing_drones(0, domain_hives())
+	expected_outgoing = 99999
+	assert outgoing == expected_outgoing
+
+@patch('distribution.service.buildingservice.get_all_buildings')
+def test_get_building_of_hive_correct_return(mock_buildings):
+	mock_buildings.return_value = domain_buildings()
+	building = hiveservice.get_building_of_hive(12)
+	expected_building = 2
+	assert building == expected_building
+
+@patch('distribution.service.buildingservice.get_all_buildings')
+def test_get_building_of_hive_error_code(mock_buildings):
+	mock_buildings.return_value = domain_buildings()
+	building = hiveservice.get_building_of_hive(0)
+	expected_building = -1
+	assert building == expected_building
 
 @patch('distribution.service.droneservice.get_all_drones')
 def test_get_drones_of_hive(mock_drones):

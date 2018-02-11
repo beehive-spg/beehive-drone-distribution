@@ -22,7 +22,6 @@ def get_needed_drones(_id, time):
 
 def get_drone_demand(hiveid, hives):
 	for hive in hives:
-		hive = Hive(hive)
 		if (hive.id == hiveid):
 			return hive.demand
 	return 99999
@@ -51,13 +50,13 @@ def set_d_of_hive(hiveid, hives):
 def get_incoming_drones(hiveid, hives):
 	for hive in hives:
 		if (hive.id == hiveid):
-			return hive.i
+			return hive.incoming
 	return 99999
 
 def get_outgoing_drones(hiveid, hives):
 	for hive in hives:
 		if (hive.id == hiveid):
-			return hive.o
+			return hive.outgoing
 	return 99999
 
 def get_building_of_hive(hiveid):

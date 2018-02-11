@@ -1,39 +1,46 @@
 #!/usr/bin/env python3
 from distribution.rest import rest
+from distribution.domain.type import Type
+from distribution.domain.drone import Drone
 from distribution.service import locationservice
 
+def get_all_drones():
+	all_drones = rest.get_all_drones()
+	drones = []
+	for drone in all_drones:
+		dronedomain = get_dronedomain(drone)
+		drones.append(dronedomain)
+	return drones
+
 def get_time_of_impact(_from, to):
-	types = rest.get_types()
+	types = get_types()
 	flying_time = get_flying_time(_from, to, types)
-	chargetime = get_chargetime_of_drone(types)
-	return flying_time + chargetime
+	return flying_time + types.chargetime
 
 # TODO: get remaining charging time
 def get_average_time_of_impact(_id):
-	types = rest.get_types()
+	types = get_types()
 	flying_time = get_average_flying_time(_id, types)
-	chargetime = get_chargetime_of_drone(types)
-	return flying_time + chargetime
+	return flying_time + types.chargetime
 
 def get_flying_time(_from, to, types):
 	distance = locationservice.get_distance_between(_from, to)
-	speed = get_speed_of_drone(types)
-	return distance / speed
+	return distance / types.speed
 
 def get_average_flying_time(_id, types):
 	distance = locationservice.get_average_distance_to(_id)
-	speed = get_speed_of_drone(types)
-	return distance / speed
-
-def get_chargetime_of_drone(types):
-	return types['chargetime']
-
-def get_speed_of_drone(types):
-	return types['speed']
-
-def get_range_of_drone(types):
-	return types['range']
+	return distance / types.speed
 
 def get_total_number_of_drones():
 	all_drones = rest.get_all_drones()
 	return len(all_drones)
+
+def get_dronedomain(json):
+	drone = Drone(json)
+	drone.validate()
+	return drone
+
+def get_types():
+	types = rest.get_types()
+	typedomain = Type(types)
+	return typedomain

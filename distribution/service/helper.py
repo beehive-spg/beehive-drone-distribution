@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 import datetime, time
 
+def now():
+	return datetime.datetime.now()
+
 def get_timestamp_for_the_next_day():
 	now = datetime.datetime.now()
 	if (now.hour < 6):

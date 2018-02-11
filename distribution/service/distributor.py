@@ -3,7 +3,7 @@ import sys
 import os
 import logging
 from distribution.rabbitmq import publisher
-from distribution.service import hiveservice, locationservice, helper
+from distribution.service import hiveservice, buildingservice, locationservice, helper
 import collections
 
 logging.basicConfig(stream=sys.stdout, level=logging.INFO,
@@ -56,16 +56,16 @@ def distribute_inwardly():
 	global hives_with_drones
 	hives_with_drones = hiveservice.get_hives_with_drones()
 	logging.info(hives_with_drones)
-	down = locationservice.get_y(descending=True)
+	all_buildings = buildingservice.get_all_buildings()
+	down = locationservice.get_y(all_buildings, descending=True)
 	up = locationservice.get_y()
 	right = locationservice.get_x()
-	left = locationservice.get_x(descending=True)
+	left = locationservice.get_x(all_buildings, descending=True)
 	logging.info("down"+str(down))
 	logging.info(up)
 	logging.info(right)
 	logging.info(left)
 	hives = dict()
-	hives_with_location = hiveservice.get_hive_locations()
 	if (len(up) < len(right)):
 		iterations = len(up)
 		logging.info("up is smaller")
@@ -73,13 +73,13 @@ def distribute_inwardly():
 		logging.info("up is smaller")
 		iterations = len(right)
 	for it in range(iterations):
-		hives = locationservice.get_hives_by_y(down[it])
+		hives = locationservice.get_buildings_by_y(down[it], all_buildings)
 		check_hives(hives)
-		hives = locationservice.get_hives_by_x(left[it])
+		hives = locationservice.get_buildings_by_x(left[it], all_buildings)
 		check_hives(hives)
-		hives = locationservice.get_hives_by_y(up[it])
+		hives = locationservice.get_buildings_by_y(up[it], all_buildings)
 		check_hives(hives)
-		hives = locationservice.get_hives_by_x(right[it])
+		hives = locationservice.get_buildings_by_x(right[it], all_buildings)
 		check_hives(hives)
 
 def check_hives(hives):

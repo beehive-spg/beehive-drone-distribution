@@ -5,10 +5,10 @@ from schematics.types.compound import ModelType
 
 class Drone(Model):
 	id = IntType(required=True)
-	hive = ModelType(Hive)
-	name = StringType()
-	type = ModelType(Type)
+	hive = ModelType(Hive, serialize_when_none=False)
+	name = StringType(serialize_when_none=False)
+	type = ModelType(Type, serialize_when_none=False)
 	status = StringType(choices = [
 							Status.idle.value,
 							Status.flying.value,
-							Status.charging.value ])
+							Status.charging.value ], serialize_when_none=False)

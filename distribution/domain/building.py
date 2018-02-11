@@ -1,4 +1,4 @@
-from distribution.domain import Hive
+from distribution.domain.hive import Hive
 from schematics.models import Model
 from schematics.types import IntType, StringType
 from schematics.types.compound import ModelType

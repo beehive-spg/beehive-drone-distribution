@@ -21,74 +21,60 @@ def get_distance_between(_from, to):
 				return hive['distance']
 	return -1
 
-def get_map_border():
-	upper_y = upper_x = -1
-	lower_y = lower_x = sys.maxsize
-	for key, value in hiveservice.get_hive_locations().items():
-		if (upper_y < value.y):
-			upper_y = value.y
-		if (value.y < lower_y):
-			lower_y = value.y
-		if (upper_x < value.x):
-			upper_x = value.x
-		if (value.x < lower_x):
-			lower_x = value.x
-	return [ upper_y, upper_x, lower_y, lower_x ]
-
-def get_y(descending=False):
-	y_values = []
-	for key, value in hiveservice.get_hive_locations().items():
-		y_values.append(value.y)
-	y_values.sort(reverse=descending)
-	return y_values
-
-def get_x(descending=False):
+def get_x_values(all_buildings, descending=False):
 	x_values = []
-	for key, value in hiveservice.get_hive_locations().items():
-		x_values.append(value.x)
+	for building in all_buildings:
+		x_values.append(building.xcoord)
 	x_values.sort(reverse=descending)
 	return x_values
 
-def get_hives_by_x(x):
-	hives = []
-	hive_locations = hiveservice.get_hive_locations()
-	for hive in hive_locations:
-		if (hive_locations[hive].x == x):
-			hives.append(hive)
-	return hives
+def get_y_values(all_buildings, descending=False):
+	y_values = []
+	for building in all_buildings:
+		y_values.append(building.ycoord)
+	y_values.sort(reverse=descending)
+	return y_values
 
-def get_hives_by_y(y):
-	hives = []
-	hive_locations = hiveservice.get_hive_locations()
-	for hive in hive_locations:
-		if (hive_locations[hive].y == y):
-			hives.append(hive)
-	return hives
+def get_buildings_by_x(x, all_buildings):
+	x_buildings = []
+	buildings = all_buildings
+	for building in buildings:
+		if (building.xcoord == x):
+			x_buildings.append(building)
+	return x_buildings
 
-def get_upper_x(hive_locations):
+def get_buildings_by_y(y, all_buildings):
+	y_buildings = []
+	buildings = all_buildings
+	for building in buildings:
+		if (building.ycoord == y):
+			y_buildings.append(building)
+	return y_buildings
+
+def get_upper_x(all_buildings):
 	x = -1
-	for key, value in hive_locations.items():
-		if (x < value.x):
-			x = value.x
+	for building in all_buildings:
+		if (x < building.xcoord):
+			x = building.xcoord
 	return x
 
-def get_upper_y(hive_locations):
+def get_upper_y(all_buildings):
 	y = -1
-	for key, value in hive_locations.items():
-		if (y < value.y):
-			y = value.y
+	for building in all_buildings:
+		if (y < building.ycoord):
+			y = building.ycoord
 	return y
 
-def get_lower_x(hive_locations):
+def get_lower_x(all_buildings):
 	x = sys.maxsize
-	for key, value in hive_locations.items():
-		if (x > value.x):
-			x = value.x
+	for building in all_buildings:
+		if (x > building.xcoord):
+			x = building.xcoord
 	return x
 
-def get_lower_y(hive_locations):
+def get_lower_y(all_buildings):
 	y = sys.maxsize
-	for key, value in hive_locations.items():
-		if (y > value.y):
-			y = value.y
+	for building in all_buildings:
+		if (y > building.ycoord):
+			y = building.ycoord
 	return y

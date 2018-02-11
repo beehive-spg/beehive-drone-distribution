@@ -1,19 +1,39 @@
 #!/usr/bin/env python3
 import json
 from mock import patch
-from distribution.domain.point import Point
+from pytest import fixture
+from distribution.domain.building import Building
 from distribution.rest import rest
-from distribution.service import locationservice, locationservice
+from distribution.service import locationservice
+
+@fixture
+def domain_buildings():
+	return [
+				Building({"id": 1,"address": "Karlsplatz",
+							"xcoord": 16,"ycoord": 48,
+							"hive":{"id": 11,"name": "Karlsplatz",
+							"demand": -1, "free": 1}}),
+				Building({"id": 2,"address": "Westbahnhof",
+							"xcoord": 32,"ycoord": 11,
+							"hive":{"id": 12,"name": "Westbahnhof",
+							"demand": -1, "free": 3}}),
+				Building({"id": 3,"address": "Stephansplatz",
+							"xcoord": 2,"ycoord": 21,
+							"hive":{"id": 13,"name": "Stephansplatz",
+							"demand": -1, "free": 8}})]
+
+@fixture
+def json_reachable():
+	return [{	"id": 1,"start": {"id": 11},
+				"end": {"id": 13},"distance": 3000},
+				{"id": 2,"start": {"id": 12},
+				"end": {"id": 13},"distance": 2500},
+				{"id": 3,"start": {"id": 12},
+				"end": {"id": 11},"distance": 2500}]
 
 @patch('distribution.rest.rest.get_reachable_buildings')
 def test_get_average_distance_to(mock_reachable):
-	reachable = [{	'id': 1,'start': {'id': 11},
-					'end': {'id': 13},'distance': 3000},
-					{'id': 2,'start': {'id': 12},
-					'end': {'id': 13},'distance': 2500},
-					{'id': 3,'start': {'id': 12},
-					'end': {'id': 11},'distance': 2500}]
-	reachable_buildings = json.dumps(reachable)
+	reachable_buildings = json.dumps(json_reachable())
 	mock_reachable.return_value = json.loads(reachable_buildings)
 	reachable_buildings = locationservice.get_average_distance_to(13)
 	expected_hives = 5500 / 2
@@ -21,13 +41,7 @@ def test_get_average_distance_to(mock_reachable):
 
 @patch('distribution.rest.rest.get_reachable_buildings')
 def test_get_distance_between(mock_reachable):
-	reachable = [{	'id': 1,'start': {'id': 11},
-					'end': {'id': 13},'distance': 3000},
-					{'id': 2,'start': {'id': 12},
-					'end': {'id': 13},'distance': 2500},
-					{'id': 3,'start': {'id': 12},
-					'end': {'id': 11},'distance': 2500}]
-	reachable_buildings = json.dumps(reachable)
+	reachable_buildings = json.dumps(json_reachable())
 	mock_reachable.return_value = json.loads(reachable_buildings)
 	distance = locationservice.get_distance_between(12, 13)
 	expected_distance = 2500
@@ -35,92 +49,58 @@ def test_get_distance_between(mock_reachable):
 
 @patch('distribution.rest.rest.get_reachable_buildings')
 def test_get_distance_between_return_error_code(mock_reachable):
-	reachable = [{	'id': 1,'start': {'id': 11},
-					'end': {'id': 13},'distance': 3000},
-					{'id': 2,'start': {'id': 12},
-					'end': {'id': 11},'distance': 2500}]
-	reachable_buildings = json.dumps(reachable)
+	reachable_buildings = json.dumps(json_reachable())
 	mock_reachable.return_value = json.loads(reachable_buildings)
-	distance = locationservice.get_distance_between(12, 13)
+	distance = locationservice.get_distance_between(12, 14)
 	expected_distance = -1
 	assert distance == expected_distance
 
-@patch('distribution.service.hiveservice.get_hive_locations')
-def test_get_map_border(mock_hive_locations):
-	locations = { 1:Point(1,1), 2:Point(5,8), 3:Point(3,5), 4:Point(2,3) }
-	mock_hive_locations.return_value = locations
-	map_border = locationservice.get_map_border()
-	expected_border = [ 8, 5, 1, 1 ]
-	assert map_border == expected_border
-
-@patch('distribution.service.hiveservice.get_hive_locations')
-def test_get_x_descending_false(mock_hive_locations):
-	locations = { 1:Point(1,1), 2:Point(2,8), 3:Point(3,5), 4:Point(5,3) }
-	mock_hive_locations.return_value = locations
-	x = locationservice.get_x()
-	expected_x = [ 1, 2, 3, 5 ]
+def test_get_x_values_descending_false():
+	x = locationservice.get_x_values(domain_buildings())
+	expected_x = [ 2, 16, 32 ]
 	assert x == expected_x
 
-@patch('distribution.service.hiveservice.get_hive_locations')
-def test_get_x_descending_true(mock_hive_locations):
-	locations = { 1:Point(1,1), 2:Point(2,8), 3:Point(3,5), 4:Point(5,3) }
-	mock_hive_locations.return_value = locations
-	x = locationservice.get_x(True)
-	expected_x = [ 5, 3, 2, 1 ]
+def test_get_x_descending_true():
+	x = locationservice.get_x_values(domain_buildings(), True)
+	expected_x = [ 32, 16, 2 ]
 	assert x == expected_x
 
-@patch('distribution.service.hiveservice.get_hive_locations')
-def test_get_y_descending_false(mock_hive_locations):
-	locations = { 1:Point(1,1), 2:Point(2,8), 3:Point(3,5), 4:Point(5,3) }
-	mock_hive_locations.return_value = locations
-	y = locationservice.get_y()
-	expected_y = [ 1, 3, 5, 8 ]
+def test_get_y_descending_false():
+	y = locationservice.get_y_values(domain_buildings())
+	expected_y = [ 11, 21, 48 ]
 	assert y == expected_y
 
-@patch('distribution.service.hiveservice.get_hive_locations')
-def test_get_y_descending_true(mock_hive_locations):
-	locations = { 1:Point(1,1), 2:Point(2,8), 3:Point(3,5), 4:Point(5,3) }
-	mock_hive_locations.return_value = locations
-	y = locationservice.get_y(True)
-	expected_y = [ 8, 5, 3, 1 ]
+def test_get_y_descending_true():
+	y = locationservice.get_y_values(domain_buildings(), True)
+	expected_y = [ 48, 21, 11 ]
 	assert y == expected_y
 
-@patch('distribution.service.hiveservice.get_hive_locations')
-def test_get_hives_by_x(mock_hive_locations):
-	locations = { 1:Point(1,1), 2:Point(2,8), 3:Point(2,5), 4:Point(5,3) }
-	mock_hive_locations.return_value = locations
-	hives = locationservice.get_hives_by_x(2)
-	expected_hives = [ 2, 3 ]
+def test_get_hives_by_x():
+	hives = locationservice.get_buildings_by_x(2, domain_buildings())
+	expected_hives = [ domain_buildings()[2] ]
 	assert hives == expected_hives
 
-@patch('distribution.service.hiveservice.get_hive_locations')
-def test_get_hives_by_y(mock_hive_locations):
-	locations = { 1:Point(1,1), 2:Point(2,1), 3:Point(3,5), 4:Point(5,1) }
-	mock_hive_locations.return_value = locations
-	hives = locationservice.get_hives_by_y(1)
-	expected_hives = [ 1, 2, 4 ]
+def test_get_hives_by_y():
+	hives = locationservice.get_buildings_by_y(11,domain_buildings())
+	expected_hives = [ domain_buildings()[1] ]
 	assert hives == expected_hives
 
 def test_get_upper_x():
-	locations = { 1:Point(1,1), 2:Point(2,1), 3:Point(5,6), 4:Point(5,0) }
-	x = locationservice.get_upper_x(locations)
-	expected_x = 5
+	x = locationservice.get_upper_x(domain_buildings())
+	expected_x = 32
 	assert x == expected_x
 
 def test_get_upper_y():
-	locations = { 1:Point(1,1), 2:Point(2,1), 3:Point(5,6), 4:Point(5,0) }
-	y = locationservice.get_upper_y(locations)
-	expected_y = 6
+	y = locationservice.get_upper_y(domain_buildings())
+	expected_y = 48
 	assert y == expected_y
 
 def test_get_lower_x():
-	locations = { 1:Point(1,1), 2:Point(2,1), 3:Point(5,6), 4:Point(5,0) }
-	x = locationservice.get_lower_x(locations)
-	expected_x = 1
+	x = locationservice.get_lower_x(domain_buildings())
+	expected_x = 2
 	assert x == expected_x
 
 def test_get_lower_y():
-	locations = { 1:Point(1,1), 2:Point(2,1), 3:Point(5,6), 4:Point(5,0) }
-	y = locationservice.get_lower_y(locations)
-	expected_y = 0
+	y = locationservice.get_lower_y(domain_buildings())
+	expected_y = 11
 	assert y == expected_y

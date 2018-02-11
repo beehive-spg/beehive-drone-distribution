@@ -211,14 +211,13 @@ def test_get_hives_with_dronecount(mock_hives, mock_drones):
 				length += 1
 	assert length == expected_length
 
-# -------------- REFACTOR
 @patch('distribution.rest.rest.get_all_buildings')
 def test_get_all_hives(mock_buildings):
 	mock_buildings.return_value = json_buildings()
 	hives = hiveservice.get_all_hives()
-	hive11 = domain_hives()[0]#Hive({'id': 11, 'name': 'Karlsplatz', 'demand': -1, 'free': 1})
-	hive12 = domain_hives()[1]#Hive({'id': 12, 'name': 'Westbahnhof', 'demand': -1, 'free': 3})
-	hive13 = domain_hives()[2]#Hive({'id': 13, 'name': 'Stephansplatz', 'demand': -1, 'free': 8})
+	hive11 = domain_hives()[0]
+	hive12 = domain_hives()[1]
+	hive13 = domain_hives()[2]
 	expected_hives = [ hive11, hive12, hive13 ]
 	assert_domain_lists(hives, expected_hives)
 

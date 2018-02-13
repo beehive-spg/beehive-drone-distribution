@@ -36,7 +36,11 @@ def get_drones_of_hive(_id):
 	return hives.json()
 
 def post_hive_drone(drone):
-	r.post(url("/drones"), json.dumps(drone.to_primitive()))
+	postdrone = dict()
+	postdrone['hiveid'] = drone.hive.id
+	postdrone['name'] = drone.name
+	postdrone['status'] = drone.status.ident
+	r.post(url("/drones"), json.dumps(postdrone))
 
 def post_drone_demand_of_hive(hive):
 	r.post(url("/hives", json.dumps(hive.to_primitive())))

@@ -5,7 +5,7 @@ from schematics.types import IntType, StringType
 from schematics.types.compound import ModelType
 
 class Reachable(Model):
-	id = IntType(required=True)
-	start = ModelType(Building, serialize_when_none=False)
-	end = ModelType(Building, serialize_when_none=False)
-	distance = IntType(serialize_when_none=False)
+	id = IntType(required=True, serialized_name='db/id')
+	start = ModelType(Building, serialize_when_none=False, serialized_name='hive/start')
+	end = ModelType(Building, serialize_when_none=False, serialized_name='hive/end')
+	distance = IntType(serialize_when_none=False, serialized_name='hive/distance')

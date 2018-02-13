@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 from pytest import fixture
 from unittest.mock import patch
-from distribution.domain.type import Type
 from distribution.domain.drone import Drone
+from distribution.domain.dronetype import Dronetype
 from distribution.service import droneservice, locationservice
 
 @fixture
@@ -30,7 +30,7 @@ def json_types():
 
 @fixture
 def typedomain():
-	return Type({"id": 101, "name": "type-01", "range": 100,
+	return Dronetype({"id": 101, "name": "type-01", "range": 100,
 					"speed": 15, "chargetime": 30, "default": True})
 
 @patch('distribution.rest.rest.get_all_drones')

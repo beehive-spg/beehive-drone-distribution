@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 from distribution.rest import rest
-from distribution.domain.type import Type
+from distribution.domain.dronetype import Dronetype
 from distribution.domain.drone import Drone
 from distribution.service import locationservice
 
@@ -42,5 +42,5 @@ def get_dronedomain(json):
 
 def get_types():
 	types = rest.get_types()
-	typedomain = Type(types)
+	typedomain = Dronetype(types)
 	return typedomain

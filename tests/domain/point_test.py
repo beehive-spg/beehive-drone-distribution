@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 from unittest.mock import patch
-from drone_distribution.point import Point
+from distribution.domain.point import Point
 
 def test_shift_and_repr():
 	point = Point(10, 10)

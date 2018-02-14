@@ -15,7 +15,7 @@ def get_number_of_moved_drones():
 	drones = r.get(url("/distributions"))
 	return drones.json()
 
-def get_all_hives():
+def get_all_buildings():
 	hives = r.get(url("/hives"))
 	return hives.json()
 
@@ -36,10 +36,14 @@ def get_drones_of_hive(_id):
 	return hives.json()
 
 def post_hive_drone(drone):
-	r.post(url("/drones"), str(drone))
+	postdrone = dict()
+	postdrone['hiveid'] = drone.hive.id
+	postdrone['name'] = drone.name
+	postdrone['status'] = drone.status.ident
+	r.post(url("/drones"), json.dumps(postdrone))
 
-def post_drone_demand_of_hive(_id, demand):
-	r.post(url("/hive/" + str(_id), demand))
+def post_drone_demand_of_hive(hive):
+	r.post(url("/hives", json.dumps(hive.to_primitive())))
 
 def url(route):
 	host = os.environ.get('DB_URL', os.environ['DBURL'])

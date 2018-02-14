@@ -15,9 +15,9 @@ def get_drones_to_send(hiveid, eotd):
 	return get_free_drones(hiveid, hives)
 
 # returns number of drones needed(+) or missing(-)
-def get_needed_drones(_id, time):
-	demand = get_drone_demand(time, _id)
-	supply = get_free_drones(time, _id)
+def get_needed_drones(hiveid, time):
+	demand = get_drone_demand(time, hiveid)
+	supply = get_free_drones(time, hiveid)
 	return demand - supply
 
 def get_drone_demand(hiveid, hives):
@@ -66,8 +66,8 @@ def get_building_of_hive(hiveid):
 			return building.id
 	return -1
 
-def is_giving_drones_now(_id):
-	return is_giving_drones(_id, helper.now())
+def is_giving_drones_now(hiveid):
+	return is_giving_drones(hiveid, helper.now())
 
 def is_giving_drones(hiveid, time):
 	number_of_drones = get_needed_drones(hiveid, time)
@@ -126,47 +126,47 @@ def get_hivedomain(json):
 
 
 ### --------- Adapt to database
-def get_workload_in(time, _id):
-	orders = get_orders_in(time, _id)
-	drones = get_drones_in(time, _id)
+def get_workload_in(time, hiveid):
+	orders = get_orders_in(time, hiveid)
+	drones = get_drones_in(time, hiveid)
 	return orders / drones
 
-def get_amount_of_drones_for(_id):
-	workload = get_workload_in(0, _id)
-	orders = get_orders_in(droneservice.get_time_of_impact(), _id)
-	drones = get_drones_in(droneservice.get_time_of_impact(), _id)
+def get_amount_of_drones_for(hiveid):
+	workload = get_workload_in(0, hiveid)
+	orders = get_orders_in(droneservice.get_time_of_impact(), hiveid)
+	drones = get_drones_in(droneservice.get_time_of_impact(), hiveid)
 	return drones - (orders / workload)
 
 # rising or decreasing
-def get_prediction_status(_id):
-	current_workload = get_workload_in(0, _id)
-	predicted_workload = get_workload_in(droneservice.get_time_of_impact(), _id)
+def get_prediction_status(hiveid):
+	current_workload = get_workload_in(0, hiveid)
+	predicted_workload = get_workload_in(droneservice.get_time_of_impact(), hiveid)
 	return predicted_workload - current_workload
 
-def get_sum_of_workload_of(_id):
-	current_workload = get_workload_in(0, _id)
+def get_sum_of_workload_of(hiveid):
+	current_workload = get_workload_in(0, hiveid)
 	_sum = current_workload
-	predicted_workload_inbetween = get_workload_in(droneservice.get_time_of_impact()/2, _id)
+	predicted_workload_inbetween = get_workload_in(droneservice.get_time_of_impact()/2, hiveid)
 	_sum += predicted_workload_inbetween
-	predicted_workload_at_drone_arrival = get_workload_in(droneservice.get_time_of_impact(), _id)
+	predicted_workload_at_drone_arrival = get_workload_in(droneservice.get_time_of_impact(), hiveid)
 	_sum += predicted_workload_at_drone_arrival
 	return _sum
 
 # TODO: adapt to database
-def get_drones_in(time, _id):
-	drones = rest.get_drones_in(time, _id)
+def get_drones_in(time, hiveid):
+	drones = rest.get_drones_in(time, hiveid)
 	return drones
 
 # TODO: adapt to database
-def get_orders_in(time, _id):
-	return rest.get_orders_in(time, _id)
+def get_orders_in(time, hiveid):
+	return rest.get_orders_in(time, hiveid)
 
 
 # TODO: replace by get reachable building if not needed
 # TODO: if needed, get_building_of_hive will return buildingdomain
-def get_reachable_hives(_id):
-	_id = get_building_of_hive(_id)
-	buildings = get_reachable_buildings(_id)
+def get_reachable_hives(hiveid):
+	hiveid = get_building_of_hive(hiveid)
+	buildings = get_reachable_buildings(hiveid)
 	all_hives = rest.get_all_hives()
 	reachable = []
 	for hive in all_hives:
@@ -176,9 +176,9 @@ def get_reachable_hives(_id):
 	return reachable
 
 ### ---------------------------------------- OPTIONAL
-def get_impact_to(_id, drones):
-	future_orders = get_orders_in(droneservice.get_time_of_impact(), _id)
-	future_drones = get_drones_in(droneservice.get_time_of_impact(), _id)
+def get_impact_to(hiveid, drones):
+	future_orders = get_orders_in(droneservice.get_time_of_impact(), hiveid)
+	future_drones = get_drones_in(droneservice.get_time_of_impact(), hiveid)
 	future_drones += drones
 	return future_orders / future_drones
 

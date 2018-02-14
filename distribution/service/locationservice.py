@@ -2,11 +2,11 @@ import sys
 from distribution.rest import rest
 from distribution.service import hiveservice
 
-def get_average_distance_to(_id):
+def get_average_distance_to(hiveid):
 	reachable_buildings = rest.get_reachable_buildings()
 	distance = []
 	for hive in reachable_buildings:
-		if (hive['end']['id'] == _id or hive['start']['id'] == _id):
+		if (hive['end']['id'] == hiveid or hive['start']['id'] == hiveid):
 			distance.append(hive['distance'])
 	return sum(distance) / len(distance)
 

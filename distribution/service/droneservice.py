@@ -18,17 +18,17 @@ def get_time_of_impact(_from, to):
 	return flying_time + types.chargetime
 
 # TODO: get remaining charging time
-def get_average_time_of_impact(_id):
+def get_average_time_of_impact(hiveid):
 	types = get_types()
-	flying_time = get_average_flying_time(_id, types)
+	flying_time = get_average_flying_time(hiveid, types)
 	return flying_time + types.chargetime
 
 def get_flying_time(_from, to, types):
 	distance = locationservice.get_distance_between(_from, to)
 	return distance / types.speed
 
-def get_average_flying_time(_id, types):
-	distance = locationservice.get_average_distance_to(_id)
+def get_average_flying_time(hiveid, types):
+	distance = locationservice.get_average_distance_to(hiveid)
 	return distance / types.speed
 
 def get_total_number_of_drones():

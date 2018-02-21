@@ -42,8 +42,8 @@ def post_hive_drone(drone):
 	postdrone['status'] = drone.status.ident
 	r.post(url("/drones"), json.dumps(postdrone))
 
-def post_drone_demand_of_hive(hive):
-	r.post(url("/hives", json.dumps(hive.to_primitive())))
+def post_drone_demand_of(hive):
+	r.post(url("/hives" + str(hive.id) + "/" + str(hive.demand)))
 
 def url(route):
 	host = os.environ.get('DB_URL', os.environ['DBURL'])

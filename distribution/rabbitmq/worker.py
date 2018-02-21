@@ -3,8 +3,9 @@ import pika
 import os
 import sys
 import logging
+from distribution import operator
 
-logging.basicConfig(stream=sys.stdout, level=logging.INFO, 
+logging.basicConfig(stream=sys.stdout, level=logging.INFO,
 	format='%(asctime)s - %(name)-5s- %(levelname)-5s- %(message)s')
 
 def main():
@@ -36,6 +37,7 @@ def start_channel():
 	channel.start_consuming()
 
 def on_response(ch, method, properties, body):
+	operator.handle_message(body)
 	logging.info("received {}".format(body))
 	ch.basic_ack(delivery_tag = method.delivery_tag)
 

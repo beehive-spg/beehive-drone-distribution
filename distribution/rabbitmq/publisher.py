@@ -4,7 +4,7 @@ import sys
 import os
 import logging
 
-logging.basicConfig(stream=sys.stdout, level=logging.INFO, 
+logging.basicConfig(stream=sys.stdout, level=logging.INFO,
 	format='%(asctime)s - %(name)-5s- %(levelname)-5s- %(message)s')
 
 def send_distribution(order):
@@ -24,7 +24,7 @@ def setup():
 
 def start_queue():
 	channel.queue_declare(queue=queue_name, durable=True)
-		
+
 def send_message(message):
 	channel.basic_publish(exchange='',
               routing_key=queue_name,

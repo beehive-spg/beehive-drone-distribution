@@ -11,6 +11,14 @@ def get_all_buildings():
 		buildings.append(buildingdomain)
 	return buildings
 
+def get_all_buildings_in(buildings):
+	all_buildings = buildings
+	buildings = []
+	for building in all_buildings:
+		buildingdomain = get_buildingdomain(building)
+		buildings.append(buildingdomain)
+	return buildings
+
 def get_buildingdomain(json):
 	building = Building(json)
 	building.validate()

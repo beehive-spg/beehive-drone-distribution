@@ -46,6 +46,10 @@ def set_d_of_hive(hiveid, hives):
 	hive.demand = drone_demand
 	rest.post_desired_drones_of_hive(hive)
 
+def update_demand(hivedomains):
+	for hive in hivedomains:
+		rest.post_drone_demand_of(hive)
+
 # TODO: error code handling, parameter is list of hives
 def get_incoming_drones(hiveid, hives):
 	for hive in hives:
@@ -114,6 +118,13 @@ def set_drones_for_hive(hiveid, amount):
 
 def get_all_hives():
 	all_buildings = buildingservice.get_all_buildings()
+	hives = []
+	for building in all_buildings:
+		hives.append(building.hive)
+	return hives
+
+def get_all_hives_by_buildings(buildings):
+	all_buildings = buildings
 	hives = []
 	for building in all_buildings:
 		hives.append(building.hive)

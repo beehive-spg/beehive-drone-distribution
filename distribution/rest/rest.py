@@ -15,6 +15,11 @@ def get_number_of_moved_drones():
 	drones = r.get(url("/distributions"))
 	return drones.json()
 
+def get_number_of_outgoing_between(hive, start, end):
+	hives = r.get(url("/api/outgoing/" + str(hive.id) + "/"
+						+ str(start)+ "/" + str(end)))
+	return hives.json()
+
 def get_all_buildings():
 	hives = r.get(url("/hives"))
 	return hives.json()

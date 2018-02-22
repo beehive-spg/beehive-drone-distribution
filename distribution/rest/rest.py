@@ -37,7 +37,7 @@ def get_all_drones():
 	return hives.json()
 
 def get_drones_of_hive(_id):
-	hives = r.get(url("/drones/hive/" + str(_id)))
+	hives = r.get(url("/hives/" + str(_id) + "/drones"))
 	return hives.json()
 
 def post_hive_drone(drone):

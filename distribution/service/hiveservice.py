@@ -33,7 +33,7 @@ def get_free_drones(hiveid, hives):
 		hive = Hive(hive)
 		if (hive.id == hiveid):
 			return hive.free
-	return -1
+	raise KeyError("ID " + str(hiveid) + " of hive not found!")
 
 def set_d_of_hive(hiveid, hives):
 	incoming = get_incoming_drones(hiveid, hives)
@@ -46,9 +46,12 @@ def set_d_of_hive(hiveid, hives):
 	hive.demand = drone_demand
 	rest.post_desired_drones_of_hive(hive)
 
-def update_demand(hivedomains):
-	for hive in hivedomains:
-		rest.post_drone_demand_of(hive)
+def update_demand(hive):
+	rest.put_demand_of(hive)
+
+def update_demands(hives):
+	for hive in hives:
+		update_demand(hive)
 
 # TODO: error code handling, parameter is list of hives
 def get_incoming_drones(hiveid, hives):
@@ -134,6 +137,19 @@ def get_hivedomain(json):
 	hive = Hive(json)
 	hive.validate()
 	return hive
+
+def get_hive_by(buildingid):
+	all_buildings = buildingservice.get_all_buildings()
+	for building in all_buildings:
+		if (building.id == buildingid):
+			return building.hive
+	print("building not existing")
+
+def get_json_of_hives(hives):
+	hive_primitives = []
+	for hive in hives:
+		hive_primitives.append(hive.to_primitive())
+	return hive_primitives
 
 
 ### --------- Adapt to database

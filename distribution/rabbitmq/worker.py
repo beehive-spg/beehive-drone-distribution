@@ -35,8 +35,10 @@ def start_channel():
     channel.start_consuming()
 
 def on_response(ch, method, properties, body):
-    demand_service.update_demand(body)
-    logger.info("received {}".format(body))
+    try:
+        demand_service.update_demand(body)
+    except Exception as e:
+        logger.critical(e)
     ch.basic_ack(delivery_tag = method.delivery_tag)
 
 if __name__ == '__main__':

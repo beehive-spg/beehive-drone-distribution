@@ -1,11 +1,13 @@
 FROM python:3
 
-COPY /distribution .
-COPY requirements.txt .
-COPY .env .
+RUN mkdir beehive-drone-distribution
 
-RUN pip3 install -r ../requirements.txt
+COPY /distribution beehive-drone-distribution/distribution
+COPY requirements.txt beehive-drone-distribution
+COPY .env beehive-drone-distribution
 
-EXPOSE 5671:5671
+RUN pip3 install -r beehive-drone-distribution/requirements.txt
 
-ENTRYPOINT [ "python3", "./rabbitmq/worker.py" ]
+WORKDIR /beehive-drone-distribution/distribution
+
+ENTRYPOINT [ "python3", "op.py" ]

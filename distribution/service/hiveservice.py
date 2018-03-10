@@ -5,6 +5,7 @@ from distribution.domain.drone import Drone
 from distribution.domain.building import Building
 from distribution.rest import rest
 from distribution.service import buildingservice, droneservice, helper
+from distribution.foundation.exceptions import domain_id_error
 
 # eotd true, returns drones needed for the next day
 # eotd false, returns drones needed to harm the network as little as possible
@@ -26,8 +27,6 @@ def get_drone_demand(hiveid, hives):
 			return hive.demand
 	return 99999
 
-# TODO: adapt to database
-# TODO: non existing id? possible?
 def get_free_drones(hiveid, hives):
 	for hive in hives:
 		hive = Hive(hive)
@@ -143,13 +142,14 @@ def get_hive_by(buildingid):
 	for building in all_buildings:
 		if (building.id == buildingid):
 			return building.hive
-	print("building not existing")
+	raise domain_id_error(buildingid)
 
 def get_json_of_hives(hives):
 	hive_primitives = []
 	for hive in hives:
 		hive_primitives.append(hive.to_primitive())
 	return hive_primitives
+
 
 
 ### --------- Adapt to database
@@ -209,9 +209,7 @@ def get_impact_to(hiveid, drones):
 	future_drones += drones
 	return future_orders / future_drones
 
-def get_hive_weight_evaluation():
-	#weight_evaluation = database connection
-	return weight_evaluation
 
 def get_number_of_hives():
 	return len(get_all_hives())
+

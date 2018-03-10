@@ -2,8 +2,12 @@
 import pika
 import os
 import sys
-from foundation import logger
+from distribution.foundation.logger import Logger
+from distribution.foundation.exceptions import DomainException
+from requests.exceptions import RequestException
 from service import demand_service
+
+logger = Logger(__name__)
 
 def main():
     setup()
@@ -37,8 +41,10 @@ def start_channel():
 def on_response(ch, method, properties, body):
     try:
         demand_service.update_demand(body)
-    except Exception as e:
-        logger.critical(e)
+    except DomainException as domainex:
+        logger.critical(domainex)
+    except RequestException as requex:
+        logger.critical(requex)
     ch.basic_ack(delivery_tag = method.delivery_tag)
 
 if __name__ == '__main__':

@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 import json
-from foundation import logger
+from foundation.logger import Logger
 from distribution.service import buildingservice, routeservice, hiveservice
+
+logger = Logger(__name__)
 
 def update_demand(message):
 	decoded_message = message.decode("utf-8")

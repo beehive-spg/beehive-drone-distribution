@@ -2,10 +2,10 @@
 import pika
 import os
 import sys
+from distribution.service import demand_service
 from distribution.foundation.logger import Logger
 from distribution.foundation.exceptions import DomainException
 from requests.exceptions import RequestException
-from service import demand_service
 
 logger = Logger(__name__)
 

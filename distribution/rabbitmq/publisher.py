@@ -2,7 +2,9 @@
 import pika
 import sys
 import os
-from distribution.foundation import logger
+from distribution.foundation.logger import Logger
+
+logger = Logger(__name__)
 
 def send_distribution(order):
     setup()

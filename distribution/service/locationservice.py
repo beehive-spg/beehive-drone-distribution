@@ -7,7 +7,7 @@ from distribution.foundation.exceptions import DomainIdError
 def get_max_travel_time():
 	diagonal_of_vienna = 25000
 	drone_speed = droneservice.get_types().speed
-	return diagonal_of_vienna / drone_speed
+	return int(diagonal_of_vienna / drone_speed)
 
 def get_distance(a, b):
     return vincenty(a, b).km

@@ -40,7 +40,7 @@ def start_channel():
 
 def on_response(ch, method, properties, body):
     try:
-        demand_service.update_demand(body)
+        demandservice.update_demand(body)
     except DomainException as domainex:
         logger.critical(domainex)
     except RequestException as requex:

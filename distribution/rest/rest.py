@@ -19,15 +19,15 @@ def get_to_building(hiveid):
 	return hives.json()
 
 def get_incoming_hops(buildingid):
-	time = helper.now() + locationservice.get_max_travel_time()
-	hives = r.get(url("/hives/incoming/" + str(hive.id) + "/"
+	time = int(helper.now_timestamp()) + locationservice.get_max_travel_time()
+	hives = r.get(url("/hives/incoming/" + str(buildingid) + "/"
 						+ str(time)))
 	hives.raise_for_status()
 	return hives.json()
 
 def get_incoming_hops(buildingid):
-	time = helper.now() + locationservice.get_max_travel_time()
-	hives = r.get(url("/hives/incoming/" + str(hive.id) + "/"
+	time = int(helper.now_timestamp()) + locationservice.get_max_travel_time()
+	hives = r.get(url("/hives/incoming/" + str(buildingid) + "/"
 						+ str(time)))
 	hives.raise_for_status()
 	return hives.json()

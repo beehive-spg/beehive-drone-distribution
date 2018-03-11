@@ -18,15 +18,15 @@ def update_demand(message):
 
 	hives_to_update = get_new_demand(route, hop)
 	log_hives = hiveservice.get_json_of_hives(hives_to_update)
-	logger.info("Route_ " + str(route_id) +": hives to update " + str(log_hives))
+	logger.info("Route_" + str(route_id) +": hives to update " + str(log_hives))
 
-	hiveservice.update_demands(hives_to_update)
+	#hiveservice.update_demands(hives_to_update)
 
-def get_new_demand(route, hop_id):
-	end_hive = get_end_hop_demand(route, hop_id)
+def get_new_demand(route, hop):
+	end_hive = get_end_hop_demand(route, hop)
 
 	start_hop = route.hops[0]
-	if (is_start_hop(hop_id, start_hop.id)):
+	if (is_start_hop(hop, start_hop)):
 		start_hive = get_start_hop_demand(start_hop)
 		distributionservice.evaluate_hive(start_hive)
 		return [ start_hive, end_hive ]
@@ -34,8 +34,7 @@ def get_new_demand(route, hop_id):
 	return [ end_hive ]
 
 def is_start_hop(message_hop, route_start):
-	return message_hop == route_start
-
+	return message_hop.id == route_start.id
 
 def get_start_hop_demand(start_hop):
 	start_hive = hiveservice.get_hive_by(start_hop.start.id)

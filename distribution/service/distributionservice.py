@@ -7,8 +7,8 @@ import collections
 logger = Logger(__name__)
 
 def get_complete_hivedomain(hive):
-    incoming = hiveservice.get_number_of_incoming_hops()
-    outgoing = hiveservice.get_number_of_outgoing_hops()
+    incoming = hiveservice.get_number_of_incoming_hops(hive.id)
+    outgoing = hiveservice.get_number_of_outgoing_hops(hive.id)
     free = hiveservice.get_free_drones(hive.id, )
     hive.incoming = incoming
     hive.outgoing = outgoing
@@ -31,8 +31,8 @@ def is_needing_drone(io_ratio, incoming, outgoing, free):
     return False
 
 def evaluate_hive(hive):
-    incoming = hiveservice.get_number_of_incoming_hops()
-    outgoing = hiveservice.get_number_of_outgoing_hops()
+    incoming = hiveservice.get_number_of_incoming_hops(hive.id)
+    outgoing = hiveservice.get_number_of_outgoing_hops(hive.id)
     io_ratio = get_io_ratio(incoming, outgoing)
     free = hiveservice.get_free_drones(hive)
     if (io_ratio != 0):

@@ -14,7 +14,7 @@ def get_drone_demand(hiveid, hives):
 	raise domain_id_error("Hive", hiveid)
 
 def get_free_drones(hive):
-	number_of_drones = get_drones_of_hive(hive.id)
+	number_of_drones = len(get_drones_of_hive(hive.id))
 	incoming = get_number_of_incoming_hops(hive.id)
 	outgoing = get_number_of_outgoing_hops(hive.id)
 	return number_of_drones - outgoing + incoming - hive.demand

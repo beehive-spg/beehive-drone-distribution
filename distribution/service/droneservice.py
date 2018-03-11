@@ -41,6 +41,6 @@ def get_dronedomain(json):
 	return drone
 
 def get_types():
-	types = rest.get_types()
+	types = rest.get_types()[0]
 	typedomain = Dronetype(types)
 	return typedomain

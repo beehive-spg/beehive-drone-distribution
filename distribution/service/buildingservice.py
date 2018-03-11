@@ -34,3 +34,9 @@ def get_reachable_buildings(buildingid):
 		elif (reachabledomain.end.id == buildingid):
 			reachable.append(reachabledomain.start.id)
 	return reachable
+
+def get_number_of_incoming_hops(buildingid):
+	return len(rest.get_incoming_hops)
+
+def get_number_of_outgoing_hops(buildingid):
+	return len(rest.get_outgoing_hops)

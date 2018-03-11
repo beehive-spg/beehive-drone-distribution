@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import os
 import requests as r
-from foundation import logger
+from distribution.service import helper, locationservice
 
 def get_reachable_buildings():
 	hives = r.get(url("/reachable"))
@@ -13,11 +13,19 @@ def get_types():
 	types.raise_for_status()
 	return types.json()
 
-# will be implemented
-def get_number_of_moved_drones():
-	drones = r.get(url("/distributions"))
-	drones.raise_for_status()
-	return drones.json()
+def get_incoming_hops(buildingid):
+	time = helper.now() + locationservice.get_max_travel_time()
+	hives = r.get(url("/hives/incoming/" + str(hive.id) + "/"
+						+ str(time)))
+	hives.raise_for_status()
+	return hives.json()
+
+def get_incoming_hops(buildingid):
+	time = helper.now() + locationservice.get_max_travel_time()
+	hives = r.get(url("/hives/incoming/" + str(hive.id) + "/"
+						+ str(time)))
+	hives.raise_for_status()
+	return hives.json()
 
 def get_number_of_outgoing_between(hive, start, end):
 	hives = r.get(url("/api/outgoing/" + str(hive.id) + "/"
@@ -71,3 +79,9 @@ def put_demand_of(hive):
 def url(route):
 	host = os.environ.get('DB_URL', os.environ['DBURL'])
 	return host + route
+
+# will be implemented
+def get_number_of_moved_drones():
+	drones = r.get(url("/distributions"))
+	drones.raise_for_status()
+	return drones.json()

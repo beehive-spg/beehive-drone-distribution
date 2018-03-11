@@ -35,6 +35,9 @@ def get_reachable_buildings(buildingid):
 			reachable.append(reachabledomain.start.id)
 	return reachable
 
+def get_building_by(hiveid):
+	return get_buildingdomain(rest.get_to_building(hiveid))
+
 def get_number_of_incoming_hops(buildingid):
 	return len(rest.get_incoming_hops)
 

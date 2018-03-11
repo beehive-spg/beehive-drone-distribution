@@ -2,7 +2,7 @@
 import pika
 import os
 import sys
-from distribution.service import demand_service
+from distribution.service import demandservice
 from distribution.foundation.logger import Logger
 from distribution.foundation.exceptions import DomainException
 from requests.exceptions import RequestException

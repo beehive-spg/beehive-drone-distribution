@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import json
 from foundation.logger import Logger
-from distribution.service import buildingservice, routeservice, hiveservice
+from distribution.service import buildingservice, routeservice, hiveservice, distributionservice
 
 logger = Logger(__name__)
 
@@ -22,15 +22,13 @@ def update_demand(message):
 
 	hiveservice.update_demands(hives_to_update)
 
-def get_in_out_ratio(inc, out):
-	return inc / out
-
 def get_new_demand(route, hop_id):
 	end_hive = get_end_hop_demand(route, hop_id)
 
 	start_hop = route.hops[0]
 	if (is_start_hop(hop_id, start_hop.id)):
 		start_hive = get_start_hop_demand(start_hop)
+		distributionservice.evaluate_hive(start_hive)
 		return [ start_hive, end_hive ]
 
 	return [ end_hive ]
@@ -49,4 +47,3 @@ def get_end_hop_demand(route, hop):
 	endhop_hive = hiveservice.get_hive_by(end_hop.end.id)
 	endhop_hive.demand = routeservice.get_route_distance_progress(route, hop)
 	return endhop_hive
-

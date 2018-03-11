@@ -4,7 +4,7 @@ import requests as r
 from distribution.service import helper, locationservice
 
 def get_reachable_buildings():
-	hives = r.get(url("/reachable"))
+	hives = r.get(url("/api/reachable"))
 	hives.raise_for_status()
 	return hives.json()
 
@@ -12,6 +12,11 @@ def get_types():
 	types = r.get(url("/types"))
 	types.raise_for_status()
 	return types.json()
+
+def get_to_building(hiveid):
+	hives = r.get(url("/api/tobuilding/" + str(hive.id)))
+	hives.raise_for_status()
+	return hives.json()
 
 def get_incoming_hops(buildingid):
 	time = helper.now() + locationservice.get_max_travel_time()

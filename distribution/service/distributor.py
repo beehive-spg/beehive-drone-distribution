@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
 import sys
 import os
+from distribution.foundation.logger import Logger
 from distribution.rabbitmq import publisher
 from distribution.service import hiveservice, buildingservice, locationservice, helper
 import collections
+
+logger = Logger(__name__)
 
 def start_distribution_to(_id):
 	logger.info("distribution process of hive {} has started".format(_id))
@@ -45,8 +48,6 @@ def get_sending_neighbors(ranking, drones_needed):
 		get_sending_neighbors(neighbor_rank, drones_left)
 	return sending_neighbors
 
-def get_ordered_ranking(ranking):
-	return collections.OrderedDict(sorted(ranking.items(), key=lambda t: t[1]))
 
 def distribute_inwardly():
 	global hives_with_drones

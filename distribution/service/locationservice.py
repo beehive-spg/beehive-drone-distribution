@@ -1,6 +1,7 @@
 import sys
 from distribution.rest import rest
 from distribution.service import hiveservice, droneservice
+from distribution.foundation.exceptions import DomainIdError
 
 def get_max_travel_time():
 	diagonal_of_vienna = 25000
@@ -15,7 +16,6 @@ def get_average_distance_to(hiveid):
 			distance.append(hive['distance'])
 	return sum(distance) / len(distance)
 
-# error code -1 ? possible?
 def get_distance_between(_from, to):
 	reachable_buildings = rest.get_reachable_buildings()
 	for hive in reachable_buildings:
@@ -24,7 +24,8 @@ def get_distance_between(_from, to):
 			end = hive['end']['id']
 			if (end == _from or end == to):
 				return hive['distance']
-	return -1
+	raise DomainIdError("ID_FROM: " + str(_from) + "; ID_TO: " + str(to) +
+							": Couldn't get distance!")
 
 def get_x_values(all_buildings, descending=False):
 	x_values = []

@@ -14,9 +14,9 @@ def get_types():
 	return types.json()
 
 def get_to_building(hiveid):
-	hives = r.get(url("/api/tobuilding/" + str(hive.id)))
+	hives = r.get(url("/api/tobuilding/" + str(hiveid)))
 	hives.raise_for_status()
-	return hives.json()
+	return hives.json()[0]
 
 def get_incoming_hops(buildingid):
 	time = int(helper.now_timestamp()) + locationservice.get_max_travel_time()

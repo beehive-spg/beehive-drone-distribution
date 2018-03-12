@@ -118,11 +118,11 @@ def get_number_of_hives():
 	return len(get_all_hives())
 
 def get_reachable_hives(hiveid):
-	building = get_building_of_hive(hiveid).id
+	building = get_building_of_hive(hiveid)
 	reachable_buildings = buildingservice.get_reachable_buildings(building.id)
 	reachable_hives = []
-	for _id in reachable_buildings:
-		hiveid = get_hive_by(_id)
+	for buildingid in reachable_buildings:
+		hive = get_hive_by(buildingid)
 		reachable_hives.append(hive)
 	return reachable_hives
 

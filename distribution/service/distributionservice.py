@@ -9,7 +9,7 @@ logger = Logger(__name__)
 def get_complete_hivedomain(hive):
     incoming = hiveservice.get_number_of_incoming_hops(hive.id)
     outgoing = hiveservice.get_number_of_outgoing_hops(hive.id)
-    free = hiveservice.get_free_drones(hive.id, )
+    free = hiveservice.get_free_drones(hive)
     hive.incoming = incoming
     hive.outgoing = outgoing
     hive.free = free
@@ -17,6 +17,7 @@ def get_complete_hivedomain(hive):
 
 def get_complete_buildingdomain(building):
     building.hive = get_complete_hivedomain(building.hive)
+    return building
 
 def get_io_ratio(incoming, outgoing):
     if (incoming != 0 and outgoing != 0):
@@ -36,8 +37,8 @@ def evaluate_hive(hive):
     io_ratio = get_io_ratio(incoming, outgoing)
     free = hiveservice.get_free_drones(hive)
     if (io_ratio != 0):
-        if (is_needing_drone(io_ratio, incoming, outgoing, free)):
-            distribute_to(hive.id)
+        if (not is_needing_drone(io_ratio, incoming, outgoing, free)):
+            distribute_to(hive)
         else:
             logger.info("distribution to hive {} is not needed - io: {}"
                         .format(hive.id, io_ratio))
@@ -45,27 +46,28 @@ def evaluate_hive(hive):
         if (outgoing > free):
             distribute_to(hive.id)
 
-def distribute_to(_id):
-    logger.info("distribution from {} has started".format(_id))
-    neighbor_ranking = get_neighbor_ranking_of(hiveid)[0]
-    _from = neighbor_ranking.key
+def distribute_to(hive):
+    logger.info("distribution from {} has started".format(hive.id))
+    neighbor_ranking = list(get_neighbor_ranking(hive).items())
+    print(neighbor_ranking[0])
+    _from = neighbor_ranking[0]
     logger.info("rankings {}".format(neighbor_ranking))
     logger.info("distribution from {} starting".format(_from))
 
 def get_neighbor_ranking(hive):
     building = buildingservice.get_building_by(hive.id)
     ranking = dict()
-    neighbors = hiveservice.get_reachable_hives(_id)
+    neighbors = hiveservice.get_reachable_hives(hive.id)
     for neighbor in neighbors:
         neighbor_building = buildingservice.get_building_by(neighbor.id)
-        distribution_cost = distribution_cost(building, neighbor)
+        distribution_cost = get_distribution_cost(building, neighbor_building)
         ranking[neighbor_building.id] = distribution_cost
     return get_ordered_ranking(ranking)
 
-def distribution_cost(building, neighbor):
+def get_distribution_cost(building, neighbor):
     distance_cost = get_distance_cost(building, neighbor)
     workload_cost = get_workload_cost(neighbor)
-    return distance_cost * workload_cost - neighbor.free
+    return distance_cost * workload_cost - neighbor.hive.free
 
 def get_distance_cost(building, neighbor):
     building_location = (building.xcoord, building.ycoord)
@@ -74,11 +76,11 @@ def get_distance_cost(building, neighbor):
 
 def get_workload_cost(neighbor):
     neighbor = get_complete_buildingdomain(neighbor)
-    io_ratio = get_io_ratio(neighbor.incoming, neighbor.outgoing)
-    new_io_ratio = get_io_ratio(neighbor.incoming, neighbor.outgoing+1)
+    io_ratio = get_io_ratio(neighbor.hive.incoming, neighbor.hive.outgoing)
+    new_io_ratio = get_io_ratio(neighbor.hive.incoming, neighbor.hive.outgoing+1)
     difference = io_ratio - new_io_ratio
-    if (difference != 0):
-        return difference
+    #if (difference != 0):
+    return difference
 
 def get_ordered_ranking(ranking):
     return collections.OrderedDict(sorted(ranking.items(), key=lambda t: t[1]))

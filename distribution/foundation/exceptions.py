@@ -9,9 +9,9 @@ class DomainNotFoundError(DomainException):
 
 def domain_id_error(domainname, id):
     if (id == None):
-        get_id_error(domainname, "None", "ID is missing!")
+        return get_id_error(domainname, "None", "ID is missing!")
     else:
-        get_id_error(domainname, id, "ID could not be found!")
+        return get_id_error(domainname, id, "ID could not be found!")
 
 def get_id_error(domainname, id, message):
     message = domainname + "ID-" + str(id) + ": " + message

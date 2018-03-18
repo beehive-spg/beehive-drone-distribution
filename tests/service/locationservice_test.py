@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 import json
 from mock import patch
+from unittest import TestCase
 from pytest import fixture
 from distribution.domain.building import Building
 from distribution.rest import rest
 from distribution.service import locationservice
+from distribution.foundation.exceptions import DomainIdError
 
 @fixture
 def domain_buildings():
@@ -51,9 +53,8 @@ def test_get_distance_between(mock_reachable):
 def test_get_distance_between_return_error_code(mock_reachable):
 	reachable_buildings = json.dumps(json_reachable())
 	mock_reachable.return_value = json.loads(reachable_buildings)
-	distance = locationservice.get_distance_between(12, 14)
-	expected_distance = -1
-	assert distance == expected_distance
+	with TestCase.assertRaises(TestCase, DomainIdError) as die:
+		locationservice.get_distance_between(12, 14)
 
 def test_get_x_values_descending_false():
 	x = locationservice.get_x_values(domain_buildings())

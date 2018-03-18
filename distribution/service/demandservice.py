@@ -17,10 +17,10 @@ def update_demand(message):
 	hop = routeservice.get_hop_in_route(route, hop_id)
 
 	hives_to_update = get_new_demand(route, hop)
-	log_hives = hiveservice.get_json_of_hives(hives_to_update)
-	logger.info("Route_" + str(route_id) +": hives to update " + str(log_hives))
-
-	#hiveservice.update_demands(hives_to_update)
+	logger.info("Route_" + str(route_id))
+	for hive in hives_to_update:
+		logger.info("Hive to update: " + str(hive.to_primitive()))
+	hiveservice.update_demands(hives_to_update)
 
 def get_new_demand(route, hop):
 	end_hive = get_end_hop_demand(route, hop)
@@ -44,5 +44,5 @@ def get_start_hop_demand(start_hop):
 def get_end_hop_demand(route, hop):
 	end_hop = route.hops[len(route.hops)-1]
 	endhop_hive = hiveservice.get_hive_by(end_hop.end.id)
-	endhop_hive.demand = routeservice.get_route_distance_progress(route, hop)
+	endhop_hive.demand -= routeservice.get_route_distance_progress(route, hop)
 	return endhop_hive

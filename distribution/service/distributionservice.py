@@ -19,39 +19,49 @@ def get_complete_buildingdomain(building):
     building.hive = get_complete_hivedomain(building.hive)
     return building
 
+def get_io_ratio_of_hive(hive):
+    incoming = hiveservice.get_number_of_incoming_hops(hive.id)
+    outgoing = hiveservice.get_number_of_outgoing_hops(hive.id)
+    io_ratio = get_io_ratio(incoming, outgoing)
+    if (io_ratio == 0):
+        if(incoming > 0):
+            io_ratio = get_io_ratio(incoming, 1)
+        else:
+            io_ratio = get_io_ratio(incoming+hive.free, outgoing)
+    return io_ratio
+
 def get_io_ratio(incoming, outgoing):
     if (incoming != 0 and outgoing != 0):
         return incoming / outgoing
     return 0
 
-def is_needing_drone(io_ratio, incoming, outgoing, free):
+def is_needing_drone(io_ratio, hive):
     if (io_ratio < 1):
-        new_ratio = get_io_ratio(incoming+free, outgoing)
+        new_ratio = get_io_ratio(incoming+hive.free, outgoing)
         if (new_ratio < 1):
             return True
     return False
 
 def evaluate_hive(hive):
-    incoming = hiveservice.get_number_of_incoming_hops(hive.id)
-    outgoing = hiveservice.get_number_of_outgoing_hops(hive.id)
-    io_ratio = get_io_ratio(incoming, outgoing)
-    free = hiveservice.get_free_drones(hive)
+    hive.free = hiveservice.get_free_drones(hive)
+    io_ratio = get_io_ratio_of_hive(hive)
     if (io_ratio != 0):
-        if (not is_needing_drone(io_ratio, incoming, outgoing, free)):
+        if (is_needing_drone(io_ratio, hive)):
             distribute_to(hive)
         else:
             logger.info("distribution to hive {} is not needed - io: {}"
                         .format(hive.id, io_ratio))
     else:
-        if (outgoing > free):
-            distribute_to(hive.id)
+        outgoing = hiveservice.get_number_of_outgoing_hops(hive.id)
+        if (outgoing > hive.free):
+            distribute_to(hive)
 
 def distribute_to(hive):
     logger.info("distribution from {} has started".format(hive.id))
     neighbor_ranking = list(get_neighbor_ranking(hive).items())
-    print(neighbor_ranking[0])
     _from = neighbor_ranking[0]
-    logger.info("rankings {}".format(neighbor_ranking))
+    for rank in neighbor_ranking:
+        logger.info("rankings {}".format(rank))
     logger.info("distribution from {} starting".format(_from))
 
 def get_neighbor_ranking(hive):
@@ -76,10 +86,10 @@ def get_distance_cost(building, neighbor):
 
 def get_workload_cost(neighbor):
     neighbor = get_complete_buildingdomain(neighbor)
-    io_ratio = get_io_ratio(neighbor.hive.incoming, neighbor.hive.outgoing)
-    new_io_ratio = get_io_ratio(neighbor.hive.incoming, neighbor.hive.outgoing+1)
-    difference = io_ratio - new_io_ratio
-    #if (difference != 0):
+    io_ratio = get_io_ratio_of_hive(neighbor.hive)
+    neighbor.hive.outgoing += 1
+    new_io_ratio = get_io_ratio_of_hive(neighbor.hive)
+    difference = new_io_ratio - io_ratio
     return difference
 
 def get_ordered_ranking(ranking):

@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 import json
 from pytest import fixture
-from unittest.mock import patch
+from mock import patch
+from unittest import TestCase
 from distribution.domain.hive import Hive
 from distribution.domain.drone import Drone
 from distribution.domain.building import Building
 from distribution.service import hiveservice, buildingservice, droneservice
+from distribution.foundation.exceptions import DomainIdError, DomainException
 
 @fixture
 def json_buildings():
@@ -78,31 +80,6 @@ def domain_drones():
 			Drone({"id": 103,"hive": {"id": 11},"name": "drone03",
 				"type": {"id": 0},"status": {"ident": "drone.status/idle"}})]
 
-@patch('distribution.service.hiveservice.get_drones_in')
-@patch('distribution.service.hiveservice.get_orders_in')
-def test_get_workload_in(mock_orders, mock_drones):
-	mock_orders.return_value = 10
-	mock_drones.return_value = 2
-	workload = hiveservice.get_workload_in(1,1)
-	assert workload == 5
-
-@patch('distribution.service.droneservice.get_time_of_impact')
-@patch('distribution.service.hiveservice.get_drones_in')
-@patch('distribution.service.hiveservice.get_orders_in')
-@patch('distribution.service.hiveservice.get_workload_in')
-def test_amount_of_drones_for(mock_workload, mock_orders,
-								mock_drones, mock_impact_time):
-	workload = 0.5
-	orders = 50
-	drones = 100
-	mock_workload.return_value = workload
-	mock_orders.return_value = orders
-	mock_drones.return_value = drones
-	mock_impact_time.side_effect = [ 100, 100 ]
-	expected_amount = drones - (orders / workload)
-	amount_of_drones = hiveservice.get_amount_of_drones_for(0)
-	assert amount_of_drones == expected_amount
-
 @patch('distribution.rest.rest.get_reachable_buildings')
 def test_get_reachable_buildings(mock_reachable):
 	reachable_buildings = json.dumps(json_reachable())
@@ -111,48 +88,10 @@ def test_get_reachable_buildings(mock_reachable):
 	expected_hives = [ 1, 2 ]
 	assert reachable_buildings == expected_hives
 
-@patch('distribution.rest.rest.get_drones_in')
-def test_get_drones_in(mock_drones):
-	mock_drones.return_value = 10
-	drones = hiveservice.get_drones_in(1,1)
-	assert drones == 10
-
-@patch('distribution.rest.rest.get_orders_in')
-def test_orders_in(mock_orders):
-	mock_orders.return_value = 10
-	orders = hiveservice.get_orders_in(1,1)
-	assert orders == 10
-
 def test_get_free_drones():
-	free_drones = hiveservice.get_free_drones(12, json_hives())
+	free_drones = hiveservice.get_free_drones_of_hive(12, json_hives())
 	expected_drones = 3
 	assert free_drones == expected_drones
-
-@patch('distribution.service.droneservice.get_time_of_impact')
-@patch('distribution.service.hiveservice.get_workload_in')
-def test_get_prediction_status_rising(mock_workload, mock_time_of_impact):
-	mock_workload.side_effect = [ int(0.5), int(0.8) ]
-	mock_time_of_impact.return_value = 100
-	workload = hiveservice.get_prediction_status(1)
-	assert workload == int(0.3)
-
-@patch('distribution.service.droneservice.get_time_of_impact')
-@patch('distribution.service.hiveservice.get_workload_in')
-def test_get_prediction_status_decreasing(mock_workload, mock_time_of_impact):
-	mock_workload.side_effect = [ 0.8, 0.5 ]
-	mock_time_of_impact.return_value = 100
-	workload = hiveservice.get_prediction_status(1)
-	assert round(workload, 1) == -0.3
-
-@patch('distribution.service.droneservice.get_time_of_impact')
-@patch('distribution.service.hiveservice.get_workload_in')
-def test_get_sum_of_workload(mock_workload, mock_impact_time):
-	workloads = [ 0.5, 0.6, 0.7 ]
-	mock_workload.side_effect = workloads
-	mock_impact_time.side_effect = [ 10, 10 ]
-	_sum = hiveservice.get_sum_of_workload_of(0)
-	expected_sum = workloads[0] + workloads[1] + workloads[2]
-	assert _sum == expected_sum
 
 @patch('distribution.service.hiveservice.get_needed_drones')
 def test_get_drones_to_send_eotd_true(mock_needed_drones):
@@ -206,43 +145,21 @@ def test_get_drone_demand_existing():
 	assert demand == expected_demand
 
 def test_get_drone_demand_not_existing():
-	demand = hiveservice.get_drone_demand(0, domain_hives())
-	expected_demand = 99999
-	assert demand == expected_demand
-
-def test_get_incoming_drones_correct_return():
-	incoming = hiveservice.get_incoming_drones(12, domain_hives())
-	expected_incoming = 10
-	assert incoming == expected_incoming
-
-def test_get_incoming_drones_error_code():
-	incoming = hiveservice.get_incoming_drones(0, domain_hives())
-	expected_incoming = 99999
-	assert incoming == expected_incoming
-
-def test_get_outgoing_drones_correct_return():
-	outgoing = hiveservice.get_outgoing_drones(12, domain_hives())
-	expected_outgoing = 5
-	assert outgoing == expected_outgoing
-
-def test_get_outgoing_drones_error_code():
-	outgoing = hiveservice.get_outgoing_drones(0, domain_hives())
-	expected_outgoing = 99999
-	assert outgoing == expected_outgoing
+	with TestCase.assertRaises(TestCase, DomainIdError):
+		hiveservice.get_drone_demand(0, domain_hives())
 
 @patch('distribution.service.buildingservice.get_all_buildings')
 def test_get_building_of_hive_correct_return(mock_buildings):
 	mock_buildings.return_value = domain_buildings()
 	building = hiveservice.get_building_of_hive(12)
-	expected_building = 2
-	assert building == expected_building
+	expected_building_id = 2
+	assert building.id == expected_building_id
 
 @patch('distribution.service.buildingservice.get_all_buildings')
 def test_get_building_of_hive_error_code(mock_buildings):
 	mock_buildings.return_value = domain_buildings()
-	building = hiveservice.get_building_of_hive(0)
-	expected_building = -1
-	assert building == expected_building
+	with TestCase.assertRaises(TestCase, DomainException):
+		hiveservice.get_building_of_hive(0)
 
 @patch('distribution.service.droneservice.get_all_drones')
 def test_get_drones_of_hive(mock_drones):

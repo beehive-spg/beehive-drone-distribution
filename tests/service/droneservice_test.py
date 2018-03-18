@@ -25,8 +25,8 @@ def domain_drones():
 
 @fixture
 def json_types():
-	return {"id": 101, "name": "type-01", "range": 100,
-			"speed": 15, "chargetime": 30, "default": True}
+	return [{"id": 101, "name": "type-01", "range": 100,
+			"speed": 15, "chargetime": 30, "default": True}]
 
 @fixture
 def typedomain():

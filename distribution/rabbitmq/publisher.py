@@ -7,10 +7,13 @@ from distribution.foundation.logger import Logger
 logger = Logger(__name__)
 
 def send_distribution(order):
-    setup()
-    start_queue()
+    try:
+      test = channel
+    except NameError:
+      logger.info("Start publisher for the first time.")
+      setup()
+      start_queue()
     send_message(order)
-    close_connection()
 
 def setup():
     global connection, channel, queue_name

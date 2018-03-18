@@ -108,12 +108,6 @@ def get_hive_by(buildingid):
 			return building.hive
 	raise domain_id_error(buildingid)
 
-def get_json_of_hives(hives):
-	hive_primitives = []
-	for hive in hives:
-		hive_primitives.append(hive.to_primitive())
-	return hive_primitives
-
 def get_number_of_hives():
 	return len(get_all_hives())
 

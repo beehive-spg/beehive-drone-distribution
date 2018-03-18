@@ -78,7 +78,6 @@ def post_hive_drone(drone):
 
 def put_demand_of(hive):
 	put = r.put(url("/hives/" + str(hive.id) + "/" + str(hive.demand)))
-	print(put)
 	put.raise_for_status()
 
 def url(route):

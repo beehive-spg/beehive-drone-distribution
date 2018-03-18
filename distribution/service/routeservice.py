@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from distribution.domain.route import Route
 from distribution.rest import rest
+from distribution.foundation.exceptions import domain_id_error
 
 def get_all_routes():
     all_routes = rest.get_all_routes()
@@ -20,6 +21,7 @@ def get_route_by(routeid):
     for route in all_routes:
         if (route.id == routeid):
             return route
+    raise domain_id_error("Route", routeid)
 
 def get_hop_in_route(route, hopid):
     for hop in route.hops:
@@ -40,7 +42,6 @@ def get_distance_until_hop(route, current_hop):
     return distance
 
 def get_route_distance_progress(route, current_hop):
-    #current_distance = get_distance_until_hop(route, current_hop)
     distance_for_next_hop = current_hop.distance
     total_distance = get_total_distance(route)
     return distance_for_next_hop / total_distance

@@ -1,13 +1,22 @@
 FROM python:3-alpine
 
-RUN mkdir beehive-drone-distribution
+WORKDIR app
 
-COPY /distribution beehive-drone-distribution/distribution
-COPY requirements.txt beehive-drone-distribution
-COPY .env beehive-drone-distribution
+COPY requirements.txt .
 
-RUN pip3 install -r beehive-drone-distribution/requirements.txt
+RUN pip3 install -r requirements.txt
 
-WORKDIR /beehive-drone-distribution/distribution
+COPY distribution distribution
+COPY .env .
 
-ENTRYPOINT [ "python3", "op.py" ]
+ARG distribution_event
+ARG distribution_queue
+ARG rabbitmq
+ARG database
+
+ENV DISTRIBUTION_EVENT_QUEUE=$distribution_event
+ENV DISTRIBUTION_QUEUE=$distribution_queue
+ENV RABBITMQ_URL=$rabbitmq
+ENV DATABASE_URL=$database
+
+CMD python3 distribution/op.py

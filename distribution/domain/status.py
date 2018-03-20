@@ -8,4 +8,5 @@ class Status(Model):
                             Stati.idle.value,
                             Stati.flying.value,
                             Stati.charging.value,
-                            Stati.order.value ], serialize_when_none=False, serialized_name='db/ident')
+                            Stati.order.value,
+                            Stati.distribution.value ], serialize_when_none=False, serialized_name='db/ident')

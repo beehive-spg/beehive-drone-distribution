@@ -10,6 +10,9 @@ def update_demand(message):
 	loaded_message = json.loads(decoded_message)
 	logger.info("Received message: " + str(loaded_message))
 
+	event_type = loaded_message['type']
+	if (event_type == "dep"):
+		return
 	route_id = int(loaded_message['route_id'])
 	hop_id = int(loaded_message['hop_id'])
 
@@ -26,9 +29,14 @@ def get_new_demand(route, hop):
 	end_hive = get_end_hop_demand(route, hop)
 
 	start_hop = route.hops[0]
+	logger.info("------------------")
+	logger.info(start_hop.to_primitive())
+	logger.info(hop.to_primitive())
 	if (is_start_hop(hop, start_hop)):
 		start_hive = get_start_hop_demand(start_hop)
-		distributionservice.evaluate_hive(start_hive)
+		logger.info("status of route: {}".format(route.origin.ident))
+		if (route.origin.ident != "route.origin/distribution"):
+			distributionservice.evaluate_hive(start_hive)
 		return [ start_hive, end_hive ]
 
 	return [ end_hive ]

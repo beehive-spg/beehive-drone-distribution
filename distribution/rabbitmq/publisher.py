@@ -3,6 +3,7 @@ import pika
 import sys
 import os
 from distribution.foundation.logger import Logger
+import pika.exceptions as pikex
 
 logger = Logger(__name__)
 
@@ -13,15 +14,21 @@ def send_distribution(order):
       logger.info("Start publisher for the first time.")
       setup()
       start_queue()
-    send_message(order)
+    try:
+      send_message(order)
+    except pikex.ConnectionClosed:
+      logger.warning("------------------------------------------connection closed, retrying")
+      setup()
+      start_queue()
+      send_distribution(order)
 
 def setup():
     global connection, channel, queue_name
-    url = os.getenv('CLOUDAMQPURL')
+    url = os.getenv('RABBITMQ_URL')
     params = pika.URLParameters(url)
     connection = pika.BlockingConnection(params)
     channel = connection.channel()
-    queue_name = os.getenv('DISTRIBUTIONQ')
+    queue_name = os.getenv('DISTRIBUTION_QUEUE')
     logger.info("setup of publisher completed")
 
 def start_queue():

@@ -27,6 +27,7 @@ def get_hop_in_route(route, hopid):
     for hop in route.hops:
         if (hop.id == hopid):
             return hop
+    raise domain_id_error("Hop", hopid)
 
 def get_total_distance(route):
     distance = 0

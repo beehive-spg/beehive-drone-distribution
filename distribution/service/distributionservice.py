@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
+import collections
+import json
 from distribution.foundation.logger import Logger
 from distribution.rabbitmq import publisher
 from distribution.service import hiveservice, buildingservice, locationservice
-import collections
 
 logger = Logger(__name__)
 
@@ -37,7 +38,7 @@ def get_io_ratio(incoming, outgoing):
 
 def is_needing_drone(io_ratio, hive):
     if (io_ratio < 1):
-        new_ratio = get_io_ratio(incoming+hive.free, outgoing)
+        new_ratio = get_io_ratio(hive.incoming+hive.free, hive.outgoing)
         if (new_ratio < 1):
             return True
     return False
@@ -58,11 +59,14 @@ def evaluate_hive(hive):
 
 def distribute_to(hive):
     logger.info("distribution from {} has started".format(hive.id))
-    neighbor_ranking = list(get_neighbor_ranking(hive).items())
-    _from = neighbor_ranking[0]
-    for rank in neighbor_ranking:
+    neighbor_ranking = get_neighbor_ranking(hive)
+    neighbor_ranking_items = list(neighbor_ranking.items())
+    _from = list(neighbor_ranking.keys())[0]
+    for rank in neighbor_ranking_items:
         logger.info("rankings {}".format(rank))
-    logger.info("distribution from {} starting".format(_from))
+    building = buildingservice.get_building_by(hive.id)
+    logger.info("trying to distribute from {} - to {}".format(_from, building.id))
+    send(_from, building.id)
 
 def get_neighbor_ranking(hive):
     building = buildingservice.get_building_by(hive.id)
@@ -99,5 +103,5 @@ def send(_from, to):
     distribution = dict()
     distribution['from'] = str(_from)
     distribution['to'] = str(to)
-    publisher.send_distribution(distribution)
+    publisher.send_distribution(json.dumps(distribution))
     logger.info("sending from: {} - to: {}".format(_from, to))

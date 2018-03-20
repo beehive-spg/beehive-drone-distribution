@@ -15,11 +15,11 @@ def main():
 
 def setup():
     global channel, queue_name
-    url = os.getenv('CLOUDAMQPURL')
+    url = os.getenv('RABBITMQ_URL')
     params = pika.URLParameters(url)
     connection = pika.BlockingConnection(params)
     channel = connection.channel()
-    queue_name = os.getenv('ROUTEQ')
+    queue_name = os.getenv('DISTRIBUTION_EVENT_QUEUE')
     logger.info("RabbitMQ - Connection successful")
 
 def start_worker():

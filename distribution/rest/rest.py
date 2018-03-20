@@ -77,11 +77,11 @@ def post_hive_drone(drone):
 	post.raise_for_status()
 
 def put_demand_of(hive):
-	put = r.put(url("/hives/" + str(hive.id) + "/" + str(hive.demand)))
+	put = r.put(url("/hives/{0}/{1}".format(hive.id, hive.demand)))
 	put.raise_for_status()
 
 def url(route):
-	host = os.environ.get('DB_URL', os.environ['DBURL'])
+	host = os.getenv('DATABASE_URL')
 	return host + route
 
 # will be implemented

@@ -46,7 +46,6 @@ def get_number_of_outgoing_hops(hiveid):
 def get_io_ratio(hive):
 	return get_number_of_incoming_hops / get_number_of_outgoing_hops
 
-# TODO: maybe change to rest route
 def get_building_of_hive(hiveid):
 	buildings = buildingservice.get_all_buildings()
 	for building in buildings:
@@ -119,38 +118,3 @@ def get_reachable_hives(hiveid):
 		hive = get_hive_by(buildingid)
 		reachable_hives.append(hive)
 	return reachable_hives
-
-
-### TESTING
-def set_drones_for_hive(hiveid, amount):
-	for nr in range(amount):
-		drone = Drone()
-		drone.hive.id = hiveid
-		drone.name = "drone-"+str(nr)
-		drone.status.ident = "drone.status/idle"
-		rest.post_hive_drone(drone)
-
-### ---------------------------------------- OPTIONAL
-
-# eotd true, returns drones needed for the next day
-# eotd false, returns drones needed to harm the network as little as possible
-def get_drones_to_send(hiveid, eotd):
-	if (eotd):
-		return get_needed_drones(hiveid, helper.get_timestamp_for_the_next_day())
-	hives = rest.get_all_buildings()
-	return get_free_drones(hiveid, hives)
-
-# returns number of drones needed(+) or missing(-)
-def get_needed_drones(hiveid, time):
-	demand = get_drone_demand(time, hiveid)
-	supply = get_free_drones(time, hiveid)
-	return demand - supply
-
-def is_giving_drones_now(hiveid):
-	return get_free_drones(hiveid, helper.now())
-
-def is_giving_drones(hiveid, time):
-	number_of_drones = get_needed_drones(hiveid, time)
-	if (number_of_drones > 0):
-		return True
-	return False

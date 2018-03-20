@@ -83,9 +83,3 @@ def put_demand_of(hive):
 def url(route):
 	host = os.getenv('DATABASE_URL')
 	return host + route
-
-# will be implemented
-def get_number_of_moved_drones():
-	drones = r.get(url("/distributions"))
-	drones.raise_for_status()
-	return drones.json()

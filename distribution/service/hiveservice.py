@@ -4,7 +4,7 @@ from distribution.domain.hive import Hive
 from distribution.domain.drone import Drone
 from distribution.domain.building import Building
 from distribution.rest import rest
-from distribution.service import buildingservice, droneservice, helper
+from distribution.service import buildingservice, droneservice
 from distribution.foundation.exceptions import domain_id_error
 
 def get_drone_demand(hiveid, hives):
@@ -45,6 +45,12 @@ def get_number_of_outgoing_hops(hiveid):
 
 def get_io_ratio(hive):
 	return get_number_of_incoming_hops / get_number_of_outgoing_hops
+
+def get_hivecost(buildingid):
+	cost = rest.get_hivecost(buildingid)
+	dumped_cost = json.dumps(cost[0])
+	loaded_cost = json.loads(dumped_cost)
+	return float(loaded_cost['hive/cost'])
 
 def get_building_of_hive(hiveid):
 	buildings = buildingservice.get_all_buildings()

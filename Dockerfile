@@ -7,7 +7,6 @@ COPY requirements.txt .
 RUN pip3 install -r requirements.txt
 
 COPY distribution distribution
-COPY .env .
 
 ARG distribution_event
 ARG distribution_queue

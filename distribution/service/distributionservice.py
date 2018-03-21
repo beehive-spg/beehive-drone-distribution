@@ -58,14 +58,10 @@ def evaluate_hive(hive):
             distribute_to(hive)
 
 def distribute_to(hive):
-    logger.info("distribution from {} has started".format(hive.id))
     neighbor_ranking = get_neighbor_ranking(hive)
     neighbor_ranking_items = list(neighbor_ranking.items())
     _from = list(neighbor_ranking.keys())[0]
-    for rank in neighbor_ranking_items:
-        logger.info("rankings {}".format(rank))
     building = buildingservice.get_building_by(hive.id)
-    logger.info("trying to distribute from {} - to {}".format(_from, building.id))
     send(_from, building.id)
 
 def get_neighbor_ranking(hive):
@@ -74,27 +70,9 @@ def get_neighbor_ranking(hive):
     neighbors = hiveservice.get_reachable_hives(hive.id)
     for neighbor in neighbors:
         neighbor_building = buildingservice.get_building_by(neighbor.id)
-        distribution_cost = get_distribution_cost(building, neighbor_building)
+        distribution_cost = hiveservice.get_hivecost(neighbor_building.id)
         ranking[neighbor_building.id] = distribution_cost
     return get_ordered_ranking(ranking)
-
-def get_distribution_cost(building, neighbor):
-    distance_cost = get_distance_cost(building, neighbor)
-    workload_cost = get_workload_cost(neighbor)
-    return distance_cost * workload_cost - neighbor.hive.free
-
-def get_distance_cost(building, neighbor):
-    building_location = (building.xcoord, building.ycoord)
-    neighbor_location = (neighbor.xcoord, neighbor.ycoord)
-    return locationservice.get_distance(building_location, (neighbor_location))
-
-def get_workload_cost(neighbor):
-    neighbor = get_complete_buildingdomain(neighbor)
-    io_ratio = get_io_ratio_of_hive(neighbor.hive)
-    neighbor.hive.outgoing += 1
-    new_io_ratio = get_io_ratio_of_hive(neighbor.hive)
-    difference = new_io_ratio - io_ratio
-    return difference
 
 def get_ordered_ranking(ranking):
     return collections.OrderedDict(sorted(ranking.items(), key=lambda t: t[1]))
@@ -104,4 +82,3 @@ def send(_from, to):
     distribution['from'] = str(_from)
     distribution['to'] = str(to)
     publisher.send_distribution(json.dumps(distribution))
-    logger.info("sending from: {} - to: {}".format(_from, to))

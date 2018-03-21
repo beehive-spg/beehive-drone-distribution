@@ -17,7 +17,7 @@ def send_distribution(order):
     try:
       send_message(order)
     except pikex.ConnectionClosed:
-      logger.warning("------------------------------------------connection closed, retrying")
+      logger.warning("Connection closed, retrying...")
       setup()
       start_queue()
       send_distribution(order)

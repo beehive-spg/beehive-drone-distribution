@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 import os
 import requests as r
-from distribution.service import helper, locationservice
+from distribution.service import locationservice
+from distribution.foundation import helper
 
 def get_reachable_buildings():
 	hives = r.get(url("/api/reachable"))
@@ -17,6 +18,12 @@ def get_to_building(hiveid):
 	hives = r.get(url("/api/tobuilding/" + str(hiveid)))
 	hives.raise_for_status()
 	return hives.json()[0]
+
+def get_hivecost(buildingid):
+	now = helper.now_timestamp()
+	cost = r.get(url("/api/hivecosts?ids={}&time={}".format(buildingid, now)))
+	cost.raise_for_status()
+	return cost.json()
 
 def get_incoming_hops(buildingid):
 	time = int(helper.now_timestamp()) + locationservice.get_max_travel_time()

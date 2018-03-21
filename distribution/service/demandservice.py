@@ -41,11 +41,11 @@ def is_start_hop(message_hop, route_start):
 
 def get_start_hop_demand(start_hop):
 	start_hive = hiveservice.get_hive_by(start_hop.start.id)
-	start_hive.demand -= 1
+	start_hive.demand += 1
 	return start_hive
 
 def get_end_hop_demand(route, hop):
 	end_hop = route.hops[len(route.hops)-1]
 	endhop_hive = hiveservice.get_hive_by(end_hop.end.id)
-	endhop_hive.demand += routeservice.get_route_distance_progress(route, hop)
+	endhop_hive.demand -= routeservice.get_route_distance_progress(route, hop)
 	return endhop_hive

@@ -9,6 +9,11 @@ from distribution.foundation.logger import Logger
 
 logger = Logger(__name__)
 
+from distribution.prediction import regression
+
+regression.main()
+'''
+
 def main():
     while(True):
         try:
@@ -19,3 +24,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+    '''

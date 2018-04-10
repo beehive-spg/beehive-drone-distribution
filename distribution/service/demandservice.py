@@ -5,7 +5,7 @@ from distribution.service import buildingservice, routeservice, hiveservice, dis
 
 logger = Logger(__name__)
 
-def update_demand(message):
+def update_demand(message, distribution_status, receiving_connection):
 	decoded_message = message.decode("utf-8")
 	loaded_message = json.loads(decoded_message)
 	logger.info("Received message: " + str(loaded_message))
@@ -19,18 +19,20 @@ def update_demand(message):
 	route = routeservice.get_route_by(route_id)
 	hop = routeservice.get_hop_in_route(route, hop_id)
 
-	hives_to_update = get_new_demand(route, hop)
+	hives_to_update = get_new_demand(route, hop, distribution_status, receiving_connection)
 	for hive in hives_to_update:
 		logger.info("Hive to update: " + str(hive.to_primitive()))
 	hiveservice.update_demands(hives_to_update)
 
-def get_new_demand(route, hop):
+def get_new_demand(route, hop, distribution_status, receiving_connection):
 	end_hive = get_end_hop_demand(route, hop)
 
 	start_hop = route.hops[0]
 	if (is_start_hop(hop, start_hop)):
 		start_hive = get_start_hop_demand(start_hop)
-		if (route.origin.ident != "route.origin/distribution"):
+		logger.info("-----------------------------------------------------status: {}".format(distribution_status))
+		if (route.origin.ident != "route.origin/distribution" and
+			distribution_status == 1):
 			distributionservice.evaluate_hive(start_hive)
 		return [ start_hive, end_hive ]
 
@@ -47,5 +49,7 @@ def get_start_hop_demand(start_hop):
 def get_end_hop_demand(route, hop):
 	end_hop = route.hops[len(route.hops)-1]
 	endhop_hive = hiveservice.get_hive_by(end_hop.end.id)
-	endhop_hive.demand -= routeservice.get_route_distance_progress(route, hop)
+	demand_subtractor = routeservice.get_route_distance_progress(route, hop)
+	if (endhop_hive.demand > demand_subtractor):
+		endhop_hive.demand -= routeservice.get_route_distance_progress(route, hop)
 	return endhop_hive

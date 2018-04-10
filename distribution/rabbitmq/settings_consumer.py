@@ -2,16 +2,28 @@
 import pika
 import os
 import sys
+import time
+import json
 from distribution.service import demandservice
 from distribution.foundation.logger import Logger
 from distribution.foundation.exceptions import DomainException
 from requests.exceptions import RequestException
+from pika.exceptions import ConnectionClosed
 
 logger = Logger(__name__)
 
-def main():
-    setup()
-    start_worker()
+def main(distribution_status, sending_connection):
+    global dist_status, send_con
+    dist_status = distribution_status
+    send_con = sending_connection
+    while(True):
+        try:
+            setup()
+            break
+        except ConnectionClosed:
+            logger.info("RabbitMQ - waiiiiting for connection...")
+            time.sleep(5)
+    start_consumer()
 
 def setup():
     global channel, queue_name
@@ -19,10 +31,10 @@ def setup():
     params = pika.URLParameters(url)
     connection = pika.BlockingConnection(params)
     channel = connection.channel()
-    queue_name = os.getenv('DISTRIBUTION_EVENT_QUEUE')
-    logger.info("RabbitMQ - Connection successful")
+    queue_name = os.getenv('SETTINGS_QUEUE')
+    logger.info("SETTINGS_QUEUE - Connection successful")
 
-def start_worker():
+def start_consumer():
     start_queue()
     start_channel()
 
@@ -40,11 +52,14 @@ def start_channel():
 
 def on_response(ch, method, properties, body):
     try:
-        demandservice.update_demand(body)
-    except DomainException as domainex:
-        logger.critical(domainex)
-    except RequestException as requex:
-        logger.critical(requex)
+        decoded_message = body.decode("utf-8")
+        loaded_message = json.loads(decoded_message)
+        logger.info("Received message: " + str(loaded_message))
+        distribution_status = int(loaded_message['value'])
+        logger.info(distribution_status)
+        send_con.send(distribution_status)
+    except Exception as e:
+        logger.critical(e)
     ch.basic_ack(delivery_tag = method.delivery_tag)
 
 if __name__ == '__main__':

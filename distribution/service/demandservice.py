@@ -5,7 +5,7 @@ from distribution.service import buildingservice, routeservice, hiveservice, dis
 
 logger = Logger(__name__)
 
-def update_demand(message, distribution_status, receiving_connection):
+def update_demand(message, distribution_status):
 	decoded_message = message.decode("utf-8")
 	loaded_message = json.loads(decoded_message)
 	logger.info("Received message: " + str(loaded_message))
@@ -19,12 +19,12 @@ def update_demand(message, distribution_status, receiving_connection):
 	route = routeservice.get_route_by(route_id)
 	hop = routeservice.get_hop_in_route(route, hop_id)
 
-	hives_to_update = get_new_demand(route, hop, distribution_status, receiving_connection)
+	hives_to_update = get_new_demand(route, hop, distribution_status)
 	for hive in hives_to_update:
 		logger.info("Hive to update: " + str(hive.to_primitive()))
 	hiveservice.update_demands(hives_to_update)
 
-def get_new_demand(route, hop, distribution_status, receiving_connection):
+def get_new_demand(route, hop, distribution_status):
 	end_hive = get_end_hop_demand(route, hop)
 
 	start_hop = route.hops[0]

@@ -12,10 +12,10 @@ from pika.exceptions import ConnectionClosed
 
 logger = Logger(__name__)
 
-def main(distribution_status, sending_connection):
-    global dist_status, send_con
+def main(distribution_status, queue):
+    global dist_status, q
     dist_status = distribution_status
-    send_con = sending_connection
+    q = queue
     while(True):
         try:
             setup()
@@ -54,10 +54,13 @@ def on_response(ch, method, properties, body):
     try:
         decoded_message = body.decode("utf-8")
         loaded_message = json.loads(decoded_message)
-        logger.info("Received message: " + str(loaded_message))
-        distribution_status = int(loaded_message['value'])
-        logger.info(distribution_status)
-        send_con.send(distribution_status)
+        logger.info("Received message: {}".format(loaded_message))
+        setting = loaded_message['setting']
+        if(setting == "distribution"):
+            distribution_status = int(loaded_message['value'])
+            logger.info(distribution_status)
+            q.put(distribution_status)
+            q.put(distribution_status)
     except Exception as e:
         logger.critical(e)
     ch.basic_ack(delivery_tag = method.delivery_tag)

@@ -11,10 +11,10 @@ from pika.exceptions import ConnectionClosed
 
 logger = Logger(__name__)
 
-def main(distribution_status, receiving_connection):
-    global dist_status, rec_con
+def main(distribution_status, queue):
+    global dist_status, q
     dist_status = distribution_status
-    rec_con = receiving_connection
+    q = queue
     while(True):
         try:
             setup()
@@ -52,10 +52,14 @@ def start_channel():
 def on_response(ch, method, properties, body):
     global dist_status
     try:
-        if (rec_con.poll() == True):
-            dist_status = rec_con.recv()
-            logger.info("------------changed distribution status: {}".format(dist_status))
-        demandservice.update_demand(body, dist_status, rec_con)
+        if (not q.empty()):
+            incoming_status = q.get()
+            if(incoming_status != dist_status):
+                dist_status = incoming_status
+                logger.info("------------changed distribution status: {}".format(dist_status))
+            else:
+                q.put(incoming_status)
+        demandservice.update_demand(body, dist_status)
     except DomainException as domainex:
         logger.critical(domainex)
     except RequestException as requex:

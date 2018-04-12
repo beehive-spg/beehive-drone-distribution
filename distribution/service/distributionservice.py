@@ -66,13 +66,31 @@ def distribute_to(hive):
 
 def get_neighbor_ranking(hive):
     building = buildingservice.get_building_by(hive.id)
-    ranking = dict()
+    cost_ranking = dict()
+    buildingdomains = dict()
     neighbors = hiveservice.get_reachable_hives(hive.id)
     for neighbor in neighbors:
         neighbor_building = buildingservice.get_building_by(neighbor.id)
         distribution_cost = hiveservice.get_hivecost(neighbor_building.id)
-        ranking[neighbor_building.id] = distribution_cost
-    return get_ordered_ranking(ranking)
+        cost_ranking[neighbor_building.id] = distribution_cost
+        buildingdomains[neighbor_building.id] = neighbor_building
+    ordered_ranking = get_ordered_ranking(cost_ranking)
+
+    logger.info("-------hivecost ranking-------")
+    logger.info(ordered_ranking)
+
+    distance_ranking = dict()
+    hivecost = 4
+    while(len(distance_ranking) <= 0):
+        for key, value in ordered_ranking.items():
+            if(value < hivecost):
+                distance_ranking[key] = locationservice.get_distance((buildingdomains[key].xcoord, buildingdomains[key].ycoord), (building.xcoord, building.ycoord))
+        hivecost += 0.5
+
+    logger.info("-------distance ranking-------")
+    logger.info(get_ordered_ranking(distance_ranking))
+
+    return get_ordered_ranking(distance_ranking)
 
 def get_ordered_ranking(ranking):
     return collections.OrderedDict(sorted(ranking.items(), key=lambda t: t[1]))
